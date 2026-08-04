@@ -1,0 +1,5 @@
+# Test-only dependencies for fit_parser.py, on top of requirements.txt
+# (jsonschema now lives there too since the parser validates its own output
+# at runtime, not just in tests).
+-r requirements.txt
+pytest>=7.0

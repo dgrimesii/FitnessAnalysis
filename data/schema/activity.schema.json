@@ -36,12 +36,12 @@
       "type": ["string", "null"]
     },
     "elapsed_time_s": {
-      "type": ["integer", "null"],
-      "description": "Total elapsed time in seconds, including pauses."
+      "type": ["number", "null"],
+      "description": "Total elapsed time in seconds, including pauses. Real Garmin FIT session data reports this with fractional-second precision (e.g. 780.532), not whole seconds."
     },
     "moving_time_s": {
-      "type": ["integer", "null"],
-      "description": "Active/moving time in seconds, excluding pauses."
+      "type": ["number", "null"],
+      "description": "Active/moving time in seconds, excluding pauses. Real Garmin FIT session data reports this with fractional-second precision (e.g. 779.75), not whole seconds."
     },
     "calories": {
       "type": ["number", "null"]
