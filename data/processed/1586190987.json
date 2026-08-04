@@ -3,7 +3,7 @@
   "source": "strava",
   "original_source": "garmin",
   "activity_type": "cycling",
-  "name": null,
+  "name": "False start",
   "start_time": "2018-03-25T13:51:33",
   "timezone": null,
   "elapsed_time_s": 309.022,

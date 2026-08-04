@@ -3,7 +3,7 @@
   "source": "strava",
   "original_source": "garmin",
   "activity_type": "cycling",
-  "name": null,
+  "name": "Chapel Hill Double Metric from Garmin",
   "start_time": "2016-09-03T12:20:00",
   "timezone": null,
   "elapsed_time_s": 24689.613,
