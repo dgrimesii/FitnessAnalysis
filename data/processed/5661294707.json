@@ -1,0 +1,25 @@
+{
+  "id": "5661294707",
+  "source": "strava",
+  "original_source": "peloton",
+  "activity_type": "Biking",
+  "name": null,
+  "start_time": "2021-05-17T22:52:23Z",
+  "timezone": null,
+  "elapsed_time_s": 300.0,
+  "moving_time_s": null,
+  "calories": 67.77,
+  "average_heart_rate": 128.52,
+  "max_heart_rate": 133.0,
+  "device_name": null,
+  "endurance_metrics": null,
+  "strength_metrics": null,
+  "class_metrics": {
+    "instructor": null,
+    "class_title": null,
+    "class_type": "Biking",
+    "output_kj": 29.02648
+  },
+  "raw_file_reference": "5661294707.tcx.gz",
+  "ingested_at": "2026-08-04T22:24:14.586903+00:00"
+}

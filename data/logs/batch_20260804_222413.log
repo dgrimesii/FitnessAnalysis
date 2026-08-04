@@ -1,0 +1,10 @@
+2026-08-04 18:24:13,825 [INFO] Batch 20260804_222413 starting. Summary will be written to data\summaries\batch_20260804_222413.md
+2026-08-04 18:24:13,827 [INFO] SKIPPED 1665665166.gpx: unsupported file type -- not yet handled by this script (see issue #3)
+2026-08-04 18:24:13,828 [INFO] SKIPPED 19101678734.gpx: unsupported file type -- not yet handled by this script (see issue #3)
+2026-08-04 18:24:13,828 [INFO] SKIPPED 19193268093.gpx: unsupported file type -- not yet handled by this script (see issue #3)
+2026-08-04 18:24:14,840 [INFO] SKIPPED 690857529.gpx: unsupported file type -- not yet handled by this script (see issue #3)
+2026-08-04 18:24:14,899 [INFO] SKIPPED 699509866.gpx: unsupported file type -- not yet handled by this script (see issue #3)
+2026-08-04 18:24:14,953 [INFO] SKIPPED 8218818756.gpx: unsupported file type -- not yet handled by this script (see issue #3)
+2026-08-04 18:24:14,954 [INFO] SKIPPED 8221146239.gpx: unsupported file type -- not yet handled by this script (see issue #3)
+2026-08-04 18:24:14,955 [INFO] SKIPPED 9355691145.gpx: unsupported file type -- not yet handled by this script (see issue #3)
+2026-08-04 18:24:14,956 [INFO] SKIPPED Processed: directory contains no supported payload (not an activity archive)

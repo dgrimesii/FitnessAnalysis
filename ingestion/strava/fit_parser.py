@@ -7,9 +7,13 @@ and moves successfully processed entries out of the input directory into a
 "processed" directory.
 
 Each top-level entry under --input-dir can be either:
-  - a single .fit or .fit.gz file, or
-  - a folder containing exactly one .fit/.fit.gz file (an "archive folder")
-Either shape is handled automatically.
+  - a single .fit/.fit.gz file, or a .tcx/.tcx.gz file (see issue #2), or
+  - a folder containing exactly one such file (an "archive folder")
+Either shape is handled automatically. FIT and TCX are parsed by separate
+format-specific readers (parse_fit_file(), parse_tcx_file()) that both
+converge on the same {file_id, session, records} raw shape -- see
+parse_activity_payload() -- so everything downstream (schema mapping,
+validation, track output, batch/log/summary bookkeeping) is format-agnostic.
 
 Because completed entries are moved out of --input-dir on success, re-running
 this script only ever sees remaining/unprocessed entries -- so processing a
@@ -52,11 +56,11 @@ two paired artifacts, cross-referenced by that shared batch_id:
 
 Entries this script cannot yet handle -- a pre-existing, non-activity folder
 sitting in --input-dir, or a recognized-but-unsupported file type
-(.tcx/.tcx.gz, .gpx -- see follow-up issues #2 and #3) -- are *skipped*, not
-treated as failures: nothing is wrong with them, this parser just doesn't
-process that shape/format yet. Skips and failures are both left in place in
---input-dir and both show up in the batch log/summary, but are counted and
-reported separately so a skip doesn't read as something broken.
+(.gpx -- see follow-up issue #3) -- are *skipped*, not treated as failures:
+nothing is wrong with them, this parser just doesn't process that
+shape/format yet. Skips and failures are both left in place in --input-dir
+and both show up in the batch log/summary, but are counted and reported
+separately so a skip doesn't read as something broken.
 
 Usage:
     pip install -r requirements.txt
@@ -111,6 +115,18 @@ Validated against real data:
     rather than dropping them or guessing a position. Timestamps and
     cumulative distance were both confirmed monotonically non-decreasing
     across a 1,520-point/~2h8m ride.
+
+    A full survey of all 92 real .tcx.gz files for issue #2 confirmed:
+    100% Peloton (Creator/Name "Peloton Bike" or "Peloton Bike+"), 100%
+    single-lap, 100% Activity Sport="Biking", and 86/92 with a nonzero
+    average heart rate (the other 6 report 0.0 -- no strap paired --
+    mapped to null, not 0). TotalPower is joules, not kJ (confirmed:
+    TotalPower =~ TotalTimeSeconds x AverageWatts, e.g. 35519 =~ 300s x
+    113.39W), divided by 1000 in _tcx_to_raw(). Without the
+    original_source == "peloton" routing check ahead of the sport-string
+    checks in to_standard_schema(), every one of these 92 would have
+    silently landed in endurance_metrics instead of class_metrics, since
+    Sport="Biking" matches ENDURANCE_TYPES.
 """
 
 from __future__ import annotations
@@ -120,6 +136,7 @@ import gzip
 import json
 import logging
 import shutil
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -160,6 +177,13 @@ TRACK_POINT_SCHEMA = pa.schema([
     pa.field("cadence", pa.int32()),
     pa.field("speed_mps", pa.float64()),
     pa.field("distance_m", pa.float64()),
+    # Added when TCX per-point extraction was folded into this issue --
+    # FIT records in this export never report power (no source has a power
+    # meter), so this column was never needed until Peloton's Watts data.
+    # Existing FIT .parquet files written before this column existed were
+    # migrated in place (null-filled) rather than left on an older schema,
+    # so every file in data/processed_tracks/ stays uniform.
+    pa.field("power_w", pa.float64()),
 ])
 
 # Sport-type groupings used to decide which metrics block to populate.
@@ -174,14 +198,15 @@ STRENGTH_TYPES = {"training", "strength_training"}
 CLASS_TYPES = {"fitness_equipment", "cardio_training"}  # common Peloton FIT sport values
 
 # File types this script actively parses.
-SUPPORTED_EXTENSIONS = (".fit", ".fit.gz")
+FIT_EXTENSIONS = (".fit", ".fit.gz")
+TCX_EXTENSIONS = (".tcx.gz", ".tcx")  # see issue #2 -- all 92 real samples are Peloton rides
+SUPPORTED_EXTENSIONS = FIT_EXTENSIONS + TCX_EXTENSIONS
 
 # File types confirmed present in the real export (see issue #1's inspection)
-# that this script deliberately does not parse yet. These are tracked as
-# separate follow-up issues rather than being treated as parse failures here:
-#   - .tcx/.tcx.gz: all 92 real samples are Peloton rides -- issue #2
+# that this script deliberately does not parse yet -- tracked as a separate
+# follow-up issue rather than being treated as a parse failure here.
 #   - .gpx: 8 real samples (2 with no track data at all) -- issue #3
-KNOWN_UNSUPPORTED_EXTENSIONS = (".tcx.gz", ".tcx", ".gpx")
+KNOWN_UNSUPPORTED_EXTENSIONS = (".gpx",)
 
 
 def _matches_any_suffix(name: str, suffixes: tuple[str, ...]) -> bool:
@@ -190,14 +215,15 @@ def _matches_any_suffix(name: str, suffixes: tuple[str, ...]) -> bool:
     return any(lowered.endswith(suffix) for suffix in suffixes)
 
 
-def find_fit_payload(entry: Path) -> Path | None:
+def find_payload(entry: Path) -> Path | None:
     """
     Given a top-level activity entry under --input-dir, locate the actual
-    .fit/.fit.gz file to parse.
+    file to parse -- a .fit/.fit.gz file, or (see issue #2) a .tcx/.tcx.gz
+    file.
 
     Handles two possible export shapes:
-      - entry is itself a .fit/.fit.gz file
-      - entry is a folder ("archive folder") containing one .fit/.fit.gz file
+      - entry is itself a supported file
+      - entry is a folder ("archive folder") containing one supported file
     Returns None if no payload is found (caller treats this as a failure,
     entry stays in place for inspection).
     """
@@ -206,10 +232,12 @@ def find_fit_payload(entry: Path) -> Path | None:
             return entry
         return None
     if entry.is_dir():
-        candidates = sorted(list(entry.rglob("*.fit")) + list(entry.rglob("*.fit.gz")))
+        candidates = sorted(
+            p for p in entry.rglob("*") if p.is_file() and _matches_any_suffix(p.name, SUPPORTED_EXTENSIONS)
+        )
         if not candidates:
             return None
-        # Assumes one FIT payload per archive folder. If real data has
+        # Assumes one payload per archive folder. If real data has
         # multiple, this picks the first alphabetically -- revisit after
         # inspecting actual folder contents. No archive-folder-shaped
         # entries were observed in the real export (all 2,729 top-level
@@ -223,36 +251,40 @@ def classify_skip_reason(entry: Path) -> str | None:
     """
     Decide whether `entry` should be skipped outright rather than parsed or
     reported as a failure. Returns a human-readable reason, or None if
-    `entry` should proceed to find_fit_payload()/parsing as normal.
+    `entry` should proceed to find_payload()/parsing as normal.
 
     Two cases confirmed from real data (see issue #1):
-      - A directory containing no .fit/.fit.gz payload at all. Real example:
+      - A directory containing no supported payload at all. Real example:
         a pre-existing, empty `Processed/` folder was found sitting directly
         inside the real export's activities/ directory -- a leftover Strava
         export artifact, not something this script created, and unrelated
         to --processed-dir (a sibling of activities/, not nested in it).
-      - A file with a known-but-unsupported extension (.tcx/.tcx.gz/.gpx) --
-        present in the real export but handled by separate follow-up issues
-        (#2, #3), not this script.
+      - A file with a known-but-unsupported extension (.gpx) -- present in
+        the real export but handled by a separate follow-up issue (#3), not
+        this script.
 
     Anything else (an unrecognized file type, a directory with unexpected
-    contents) falls through to normal parsing, where find_fit_payload()
+    contents) falls through to normal parsing, where find_payload()
     returning None becomes a genuine failure -- those cases are worth
     surfacing for investigation rather than silently skipping.
     """
     if entry.is_dir():
-        if find_fit_payload(entry) is None:
-            return "directory contains no .fit/.fit.gz payload (not an activity archive)"
+        if find_payload(entry) is None:
+            return "directory contains no supported payload (not an activity archive)"
         return None
     if entry.is_file() and _matches_any_suffix(entry.name, KNOWN_UNSUPPORTED_EXTENSIONS):
-        return "unsupported file type -- not yet handled by this script (see issues #2/#3)"
+        return "unsupported file type -- not yet handled by this script (see issue #3)"
     return None
 
 
 def derive_activity_id(entry: Path) -> str:
-    """Derive a clean activity id from the top-level entry name (file or folder)."""
+    """
+    Derive a clean activity id from the top-level entry name (file or
+    folder). Order matters: ".gz" must strip first so ".tcx"/".fit" then
+    match against what's left (e.g. "X.tcx.gz" -> "X.tcx" -> "X").
+    """
     name = entry.name
-    for suffix in (".gz", ".fit"):
+    for suffix in (".gz", ".fit", ".tcx"):
         if name.endswith(suffix):
             name = name[: -len(suffix)]
     return name
@@ -305,6 +337,194 @@ def parse_fit_file(filepath: Path) -> dict:
     return {"file_id": file_id, "session": session, "records": records}
 
 
+# TCX's default namespace is TrainingCenterDatabase/v2 for the document as a
+# whole, but the <TPX> power/cadence/resistance extension block re-declares
+# its *own* default namespace (ActivityExtension/v2) that applies only to
+# TPX and its children -- confirmed against real files (see issue #2).
+# xml.etree.ElementTree requires namespaced tags as "{uri}localname", hence
+# these two separate prefixes.
+TCX_NS = "{http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2}"
+TCX_ACTIVITY_EXTENSION_NS = "{http://www.garmin.com/xmlschemas/ActivityExtension/v2}"
+
+
+def _xml_text(element: ET.Element | None, path: str) -> str | None:
+    """Text of the first descendant of `element` matching `path` (already namespace-qualified), or None."""
+    if element is None:
+        return None
+    found = element.find(path)
+    if found is None or found.text is None:
+        return None
+    return found.text.strip() or None
+
+
+def _xml_float(element: ET.Element | None, path: str) -> float | None:
+    text = _xml_text(element, path)
+    return float(text) if text is not None else None
+
+
+def parse_tcx_file(filepath: Path) -> dict:
+    """
+    Extract the summary fields needed from a Strava-exported TCX file
+    (Garmin's Training Center XML format, used for Strava's Peloton-synced
+    activities). Transparently handles gzip-compressed .tcx.gz files.
+
+    Confirmed against all 92 real .tcx.gz files in the export (see issue
+    #2): every one is a single-lap ride, so only the first <Activity>/<Lap>
+    is read here -- multi-lap aggregation isn't implemented and would need
+    revisiting if a future export includes multi-lap TCX files.
+
+    Returns a flat dict of raw TCX values (not yet mapped into the
+    standardized schema -- see _tcx_to_raw() for that).
+    """
+    if filepath.suffix == ".gz":
+        with gzip.open(filepath, "rb") as f:
+            xml_bytes = f.read()
+    else:
+        xml_bytes = filepath.read_bytes()
+
+    # Confirmed against a real first run against all 92 files: 54 of them
+    # (59%) have a handful of literal leading space characters before
+    # "<?xml ...?>". That's invalid per strict XML -- the declaration must
+    # be the very first thing in the document -- and
+    # xml.etree.ElementTree/expat rejects it outright ("XML or text
+    # declaration not at start of entity"). Stripping leading whitespace
+    # fixes every one of these without affecting files that don't have it.
+    xml_bytes = xml_bytes.lstrip()
+
+    root = ET.fromstring(xml_bytes)
+    activity_el = root.find(f".//{TCX_NS}Activity")
+    if activity_el is None:
+        raise ValueError("no <Activity> element found in TCX file")
+    lap_el = activity_el.find(f"{TCX_NS}Lap")
+    if lap_el is None:
+        raise ValueError("no <Lap> element found in TCX file's <Activity>")
+
+    # TPX lives under Lap/Extensions, where Extensions is still in the TCD
+    # namespace but TPX itself switches to the ActivityExtension namespace.
+    tpx_el = lap_el.find(f"{TCX_NS}Extensions/{TCX_ACTIVITY_EXTENSION_NS}TPX")
+
+    return {
+        "sport": activity_el.get("Sport"),
+        "creator_name": _xml_text(activity_el, f"{TCX_NS}Creator/{TCX_NS}Name"),
+        "start_time": lap_el.get("StartTime") or _xml_text(activity_el, f"{TCX_NS}Id"),
+        "total_time_s": _xml_float(lap_el, f"{TCX_NS}TotalTimeSeconds"),
+        "calories": _xml_float(lap_el, f"{TCX_NS}Calories"),
+        "avg_heart_rate": _xml_float(lap_el, f"{TCX_NS}AverageHeartRateBpm/{TCX_NS}Value"),
+        "max_heart_rate": _xml_float(lap_el, f"{TCX_NS}MaximumHeartRateBpm/{TCX_NS}Value"),
+        "total_power": _xml_float(tpx_el, f"{TCX_ACTIVITY_EXTENSION_NS}TotalPower"),
+        "trackpoints": _parse_tcx_trackpoints(lap_el),
+    }
+
+
+def _parse_tcx_timestamp(text: str | None) -> datetime | None:
+    """
+    Parse a TCX <Time> value (e.g. "2024-10-21T21:34:22Z") into a real
+    datetime -- for consistency with FIT's record timestamps (already
+    datetime objects from fitparse) and TRACK_POINT_SCHEMA's typed
+    timestamp column, which needs a real datetime, not a string.
+    """
+    if text is None:
+        return None
+    return datetime.fromisoformat(text.replace("Z", "+00:00"))
+
+
+def _parse_tcx_trackpoints(lap_el: ET.Element) -> list[dict]:
+    """
+    Extract per-point time-series data from a TCX <Lap>'s <Track> element
+    -- confirmed via real data (Peloton is stationary, but still logs
+    heart rate, cadence, and power once per second or two across the ride,
+    the same way FIT's per-point "record" messages do -- see issue #4).
+
+    Field names deliberately match what FIT's raw records use (timestamp,
+    heart_rate, cadence, speed, distance, power), so this list can be
+    dropped straight into raw["records"] and to_track_points() needs no
+    TCX-specific logic: position_lat/position_long/altitude are simply
+    never keys in a TCX trackpoint dict, which to_track_points() already
+    treats as "no data" (None) -- exactly right for a stationary bike.
+
+    TCX reports Cadence/HeartRateBpm with decimal precision (e.g. 87.52),
+    unlike FIT's integers -- rounded here before they reach
+    TRACK_POINT_SCHEMA's int32 columns, since pyarrow silently *truncates*
+    (not rounds) a float written into an int32 field (confirmed: 87.52 ->
+    87, not 88), which would otherwise bias every TCX value downward.
+    Heart rate 0.0 means "no strap paired" (same convention as the Lap
+    summary) and maps to None; cadence 0 is a real "coasting" value and is
+    kept, not treated as missing.
+    """
+    points = []
+    for tp_el in lap_el.findall(f"{TCX_NS}Track/{TCX_NS}Trackpoint"):
+        heart_rate = _xml_float(tp_el, f"{TCX_NS}HeartRateBpm/{TCX_NS}Value")
+        cadence = _xml_float(tp_el, f"{TCX_NS}Cadence")
+        tpx_el = tp_el.find(f"{TCX_NS}Extensions/{TCX_ACTIVITY_EXTENSION_NS}TPX")
+        points.append({
+            "timestamp": _parse_tcx_timestamp(_xml_text(tp_el, f"{TCX_NS}Time")),
+            "distance": _xml_float(tp_el, f"{TCX_NS}DistanceMeters"),
+            "heart_rate": round(heart_rate) if heart_rate else None,
+            "cadence": round(cadence) if cadence is not None else None,
+            "speed": _xml_float(tpx_el, f"{TCX_ACTIVITY_EXTENSION_NS}Speed"),
+            "power": _xml_float(tpx_el, f"{TCX_ACTIVITY_EXTENSION_NS}Watts"),
+        })
+    return points
+
+
+def _tcx_to_raw(tcx: dict) -> dict:
+    """
+    Adapt parse_tcx_file()'s TCX-specific fields into the same
+    {file_id, session, records} shape parse_fit_file() produces, so
+    to_standard_schema() can map both formats through one shared code path
+    instead of duplicating field-mapping logic per source format.
+
+    - manufacturer is set from Creator/Name when it identifies the source
+      (e.g. "Peloton Bike+" -> "peloton"), so guess_original_source() --
+      unchanged -- resolves original_source correctly for TCX same as FIT.
+    - Real data confirms Strava's TCX export reports 0.0 for heart-rate
+      fields when no strap was paired (6 of 92 real files) -- treated as
+      "no data" (None), not a literal zero heart rate.
+    - Only the summary fields issue #2 scopes in are populated (elapsed
+      time, calories, heart rate, output_kj). TCX's TotalPower is joules,
+      not kJ (confirmed: TotalPower =~ TotalTimeSeconds x AverageWatts) --
+      divided by 1000 here. moving_time_s intentionally stays unset --
+      TCX has no distinct "excluding pauses" field.
+    - records comes from parse_tcx_file()'s trackpoints (see
+      _parse_tcx_trackpoints()) -- the per-second heart rate/cadence/power
+      time series, folded into issue #4 after #2 shipped.
+    """
+    creator_name = tcx.get("creator_name") or ""
+    manufacturer = "peloton" if "peloton" in creator_name.lower() else creator_name
+
+    total_power = tcx.get("total_power")
+    avg_heart_rate = tcx.get("avg_heart_rate") or None
+    max_heart_rate = tcx.get("max_heart_rate") or None
+
+    return {
+        "file_id": {"manufacturer": manufacturer},
+        "session": {
+            "sport": tcx.get("sport"),
+            "sub_sport": tcx.get("sport"),
+            "start_time": tcx.get("start_time"),
+            "total_elapsed_time": tcx.get("total_time_s"),
+            "total_calories": tcx.get("calories"),
+            "avg_heart_rate": avg_heart_rate,
+            "max_heart_rate": max_heart_rate,
+            "total_work": (total_power / 1000) if total_power is not None else None,
+        },
+        "records": tcx.get("trackpoints", []),
+    }
+
+
+def parse_activity_payload(payload_path: Path) -> dict:
+    """
+    Parse `payload_path` into the shared {file_id, session, records} raw
+    shape, dispatching to the FIT or TCX parser by extension. Both parsers
+    converge on this same shape so to_standard_schema(),
+    validate_against_schema(), and to_track_points() don't need to know
+    which source format produced it.
+    """
+    if _matches_any_suffix(payload_path.name, TCX_EXTENSIONS):
+        return _tcx_to_raw(parse_tcx_file(payload_path))
+    return parse_fit_file(payload_path)
+
+
 def guess_original_source(file_id: dict) -> str:
     """
     Best-effort guess at the original recording app/device based on FIT
@@ -344,11 +564,12 @@ def _has_real_gps_fix(records: list[dict]) -> bool:
     return any(r.get("position_lat") is not None and r.get("position_long") is not None for r in records)
 
 
-def to_standard_schema(raw: dict, entry: Path, fit_path: Path) -> dict:
-    """Map raw FIT file_id/session data into the standardized activity schema."""
+def to_standard_schema(raw: dict, entry: Path, payload_path: Path) -> dict:
+    """Map raw file_id/session data (from parse_fit_file() or _tcx_to_raw()) into the standardized activity schema."""
     session = raw["session"]
     file_id = raw["file_id"]
     sport = str(session.get("sport", "unknown")).lower()
+    original_source = guess_original_source(file_id)
 
     start_time = session.get("start_time")
     # fitparse only decodes garmin_product to a friendly string (e.g.
@@ -361,9 +582,9 @@ def to_standard_schema(raw: dict, entry: Path, fit_path: Path) -> dict:
     activity = {
         "id": derive_activity_id(entry),
         "source": "strava",
-        "original_source": guess_original_source(file_id),
+        "original_source": original_source,
         "activity_type": session.get("sport", "unknown"),
-        "name": None,  # Strava activity names aren't stored in the FIT file itself
+        "name": None,  # Strava activity names aren't stored in the FIT/TCX file itself
         "start_time": start_time.isoformat() if hasattr(start_time, "isoformat") else start_time,
         "timezone": None,
         "elapsed_time_s": session.get("total_elapsed_time"),
@@ -381,11 +602,27 @@ def to_standard_schema(raw: dict, entry: Path, fit_path: Path) -> dict:
         "endurance_metrics": None,
         "strength_metrics": None,
         "class_metrics": None,
-        "raw_file_reference": fit_path.name,
+        "raw_file_reference": payload_path.name,
         "ingested_at": datetime.now(timezone.utc).isoformat(),
     }
 
-    if sport in ENDURANCE_TYPES:
+    # Peloton-synced workouts always belong in class_metrics, regardless of
+    # the sport string -- e.g. TCX-sourced Peloton rides report
+    # Sport="Biking", which would otherwise match ENDURANCE_TYPES below and
+    # silently populate the wrong metrics block (see issue #2). Checking
+    # original_source first, ahead of the sport-string routing, is what
+    # makes that correct. Confirmed this doesn't regress FIT-sourced
+    # routing: manufacturer was 'garmin' in 100% of a 60-file real .fit.gz
+    # sample, so original_source is never "peloton" for those and they fall
+    # through to the unchanged sport-string checks below.
+    if original_source == "peloton":
+        activity["class_metrics"] = {
+            "instructor": None,
+            "class_title": None,
+            "class_type": session.get("sub_sport"),
+            "output_kj": session.get("total_work"),
+        }
+    elif sport in ENDURANCE_TYPES:
         activity["endurance_metrics"] = {
             "distance_m": session.get("total_distance"),
             "average_speed_mps": session.get("avg_speed"),
@@ -440,6 +677,13 @@ def to_track_points(raw: dict, activity_id: str) -> list[dict]:
     higher-resolution fields, used by newer Garmin devices), falling back
     to the base altitude/speed fields otherwise -- both were present and
     numerically consistent with each other in every real file sampled.
+
+    This also handles TCX-sourced records (see _parse_tcx_trackpoints()):
+    those use the same field names (timestamp, heart_rate, cadence, speed,
+    distance, power) deliberately, so no TCX-specific branching is needed
+    here -- position_lat/position_long/altitude simply aren't keys TCX
+    records ever have, which .get() already treats as "no data" (None),
+    exactly right for a stationary bike with no GPS.
     """
     points = []
     for record in raw.get("records", []):
@@ -453,6 +697,7 @@ def to_track_points(raw: dict, activity_id: str) -> list[dict]:
             "cadence": record.get("cadence"),
             "speed_mps": _first_non_null(record, "enhanced_speed", "speed"),
             "distance_m": record.get("distance"),
+            "power_w": record.get("power"),
         })
     return points
 
@@ -662,12 +907,12 @@ def main():
                 continue
 
             try:
-                fit_path = find_fit_payload(entry)
-                if fit_path is None:
-                    raise ValueError("no .fit/.fit.gz payload found in this entry")
+                payload_path = find_payload(entry)
+                if payload_path is None:
+                    raise ValueError("no supported payload found in this entry")
 
-                raw = parse_fit_file(fit_path)
-                activity = to_standard_schema(raw, entry, fit_path)
+                raw = parse_activity_payload(payload_path)
+                activity = to_standard_schema(raw, entry, payload_path)
                 # Catches a mapping bug before it ever reaches disk -- see
                 # validate_against_schema()'s docstring for why this exists.
                 validate_against_schema(activity, activity_schema)
