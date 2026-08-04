@@ -1,0 +1,29 @@
+{
+  "id": "16467340684",
+  "source": "strava",
+  "original_source": "garmin",
+  "activity_type": "cycling",
+  "name": null,
+  "start_time": "2025-08-11T10:56:27",
+  "timezone": null,
+  "elapsed_time_s": 1270.869,
+  "moving_time_s": 1270.869,
+  "calories": 166,
+  "average_heart_rate": 111,
+  "max_heart_rate": 131,
+  "device_name": "3122",
+  "endurance_metrics": {
+    "distance_m": 7146.86,
+    "average_speed_mps": 5.624,
+    "max_speed_mps": 15.545,
+    "elevation_gain_m": 67,
+    "average_cadence": 57,
+    "average_power_w": null,
+    "max_power_w": null,
+    "gps_track_available": true
+  },
+  "strength_metrics": null,
+  "class_metrics": null,
+  "raw_file_reference": "16467340684.fit.gz",
+  "ingested_at": "2026-08-04T21:54:46.482265+00:00"
+}

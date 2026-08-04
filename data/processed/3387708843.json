@@ -1,0 +1,29 @@
+{
+  "id": "3387708843",
+  "source": "strava",
+  "original_source": "garmin",
+  "activity_type": "cycling",
+  "name": null,
+  "start_time": "2020-03-09T11:07:14",
+  "timezone": null,
+  "elapsed_time_s": 1444.368,
+  "moving_time_s": 1443.471,
+  "calories": 354,
+  "average_heart_rate": null,
+  "max_heart_rate": null,
+  "device_name": "edge810",
+  "endurance_metrics": {
+    "distance_m": 8109.4,
+    "average_speed_mps": 5.618,
+    "max_speed_mps": 14.317,
+    "elevation_gain_m": 77,
+    "average_cadence": 69,
+    "average_power_w": null,
+    "max_power_w": null,
+    "gps_track_available": true
+  },
+  "strength_metrics": null,
+  "class_metrics": null,
+  "raw_file_reference": "3387708843.fit.gz",
+  "ingested_at": "2026-08-04T22:03:53.787815+00:00"
+}

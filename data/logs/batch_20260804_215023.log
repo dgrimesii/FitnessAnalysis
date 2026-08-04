@@ -1,0 +1,4 @@
+2026-08-04 17:50:23,105 [INFO] Batch 20260804_215023 starting. Summary will be written to data\summaries\batch_20260804_215023.md
+2026-08-04 17:52:14,016 [INFO] SKIPPED 13553776569.tcx.gz: unsupported file type -- not yet handled by this script (see issues #2/#3)
+2026-08-04 17:52:14,019 [INFO] SKIPPED 13553903270.tcx.gz: unsupported file type -- not yet handled by this script (see issues #2/#3)
+2026-08-04 17:52:14,020 [INFO] SKIPPED 13553936175.tcx.gz: unsupported file type -- not yet handled by this script (see issues #2/#3)
