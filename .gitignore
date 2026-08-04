@@ -1,0 +1,16 @@
+# Raw .fit files -- keep these local/in Drive, not in git (binary, large volume)
+data/raw/*.fit
+*.fit
+
+# Secrets
+.env
+*.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store

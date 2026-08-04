@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FitnessAnalysis Activity",
+  "description": "Standardized schema for a single fitness activity, normalized across source apps (Garmin, Hevy, Peloton) synced through Strava.",
+  "type": "object",
+  "required": ["id", "source", "original_source", "activity_type", "start_time"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the activity (e.g. Strava activity ID or derived from source filename)."
+    },
+    "source": {
+      "type": "string",
+      "enum": ["strava"],
+      "description": "Platform the data was retrieved from."
+    },
+    "original_source": {
+      "type": "string",
+      "enum": ["garmin", "hevy", "peloton", "strava", "unknown"],
+      "description": "The app/device that originally recorded the activity, before syncing to Strava."
+    },
+    "activity_type": {
+      "type": "string",
+      "description": "Sport/activity type as reported in the source file (e.g. 'running', 'ride', 'weight_training', 'yoga')."
+    },
+    "name": {
+      "type": ["string", "null"],
+      "description": "Activity title, if available."
+    },
+    "start_time": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Activity start timestamp, ISO 8601."
+    },
+    "timezone": {
+      "type": ["string", "null"]
+    },
+    "elapsed_time_s": {
+      "type": ["integer", "null"],
+      "description": "Total elapsed time in seconds, including pauses."
+    },
+    "moving_time_s": {
+      "type": ["integer", "null"],
+      "description": "Active/moving time in seconds, excluding pauses."
+    },
+    "calories": {
+      "type": ["number", "null"]
+    },
+    "average_heart_rate": {
+      "type": ["number", "null"]
+    },
+    "max_heart_rate": {
+      "type": ["number", "null"]
+    },
+    "device_name": {
+      "type": ["string", "null"],
+      "description": "Recording device, if identifiable from FIT file metadata (manufacturer/product fields)."
+    },
+    "endurance_metrics": {
+      "type": ["object", "null"],
+      "description": "Populated for GPS/cardio-based activities (e.g. runs, rides, swims, hikes).",
+      "properties": {
+        "distance_m": { "type": ["number", "null"] },
+        "average_speed_mps": { "type": ["number", "null"] },
+        "max_speed_mps": { "type": ["number", "null"] },
+        "elevation_gain_m": { "type": ["number", "null"] },
+        "average_cadence": { "type": ["number", "null"] },
+        "average_power_w": { "type": ["number", "null"] },
+        "max_power_w": { "type": ["number", "null"] },
+        "gps_track_available": {
+          "type": "boolean",
+          "description": "Whether a full GPS track was present in the source file (track points not stored inline here; see raw_file_reference)."
+        }
+      }
+    },
+    "strength_metrics": {
+      "type": ["object", "null"],
+      "description": "Populated for strength-training activities (e.g. Hevy-synced workouts).",
+      "properties": {
+        "exercises": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "sets": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "reps": { "type": ["integer", "null"] },
+                    "weight_kg": { "type": ["number", "null"] },
+                    "duration_s": { "type": ["integer", "null"] }
+                  }
+                }
+              }
+            }
+          },
+          "description": "Note: Strava's own FIT export for synced strength activities often lacks per-set detail. This block stays empty until a richer source (e.g. a direct Hevy export) is added."
+        }
+      }
+    },
+    "class_metrics": {
+      "type": ["object", "null"],
+      "description": "Populated for instructor-led class activities (e.g. Peloton-synced workouts).",
+      "properties": {
+        "instructor": { "type": ["string", "null"] },
+        "class_title": { "type": ["string", "null"] },
+        "class_type": { "type": ["string", "null"] },
+        "output_kj": { "type": ["number", "null"] }
+      }
+    },
+    "raw_file_reference": {
+      "type": "string",
+      "description": "Filename of the original .fit file, for traceability back to source data."
+    },
+    "ingested_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when this record was parsed/ingested into the repository."
+    }
+  }
+}
