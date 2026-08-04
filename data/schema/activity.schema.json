@@ -69,7 +69,7 @@
         "max_power_w": { "type": ["number", "null"] },
         "gps_track_available": {
           "type": "boolean",
-          "description": "Whether a full GPS track was present in the source file (track points not stored inline here; see raw_file_reference)."
+          "description": "Whether at least one real GPS position was recorded for this activity. Track points themselves are not stored here -- see data/processed_tracks/<id>.parquet."
         }
       }
     },

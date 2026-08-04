@@ -22,6 +22,17 @@ Strava's export contains activities originally recorded by different apps
 varies widely in what it contains. This script maps whatever is present into
 a common structure and leaves source-specific fields null when unavailable.
 
+Alongside the per-activity summary JSON, every successfully parsed activity
+also gets a per-point track file at
+--tracks-dir/<activity_id>.parquet (default data/processed_tracks/), one row
+per FIT "record" message: timestamp, GPS lat/lon (converted from FIT's
+native semicircles to decimal degrees), altitude, heart rate, cadence,
+speed, and cumulative distance (see issue #4). This is the detailed
+time-series data the summary JSON deliberately doesn't carry -- it's meant
+for cross-activity analysis (e.g. "average heart rate by elevation band
+across every ride"), not per-activity inspection, which is why it's a
+separate columnar file per activity rather than embedded in the summary.
+
 Every standardized activity is validated against data/schema/activity.schema.json
 (--schema-path) *before* it's written to --output-dir. A record that fails
 validation is treated exactly like any other parse failure: nothing is
@@ -53,6 +64,7 @@ Usage:
         --input-dir "H:\\My Drive\\David Personal\\Athletics\\export_3219872\\activities" \\
         --output-dir ../../data/processed \\
         --processed-dir "H:\\My Drive\\David Personal\\Athletics\\export_3219872\\processed" \\
+        --tracks-dir ../../data/processed_tracks \\
         --log-dir ../../data/logs \\
         --summary-dir ../../data/summaries \\
         --batch-size 200
@@ -87,6 +99,18 @@ Validated against real data:
     record before it's written, so a future mismatch like this fails that
     one entry (logged, left in --input-dir) instead of writing invalid JSON
     silently.
+
+    A 15-file real-data survey for issue #4 confirmed "record" messages are
+    present in every file sampled (7,161 points total): timestamp/altitude/
+    distance/temperature in 100%, cadence in 99.3%, speed/GPS in 98.6%,
+    heart_rate in 91.2%. GPS coordinates fell within a sensible geographic
+    cluster (this rider's real area). One file's first several points had
+    heart_rate/cadence/speed/distance populated but position_lat/
+    position_long absent (normal GPS-acquisition lag) -- confirmed
+    to_track_points() needs to keep those points with lat/lon as None
+    rather than dropping them or guessing a position. Timestamps and
+    cumulative distance were both confirmed monotonically non-decreasing
+    across a 1,520-point/~2h8m ride.
 """
 
 from __future__ import annotations
@@ -100,6 +124,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import jsonschema
+import pyarrow as pa
+import pyarrow.parquet as pq
 from fitparse import FitFile
 
 # Default location of the activity JSON schema, resolved relative to this
@@ -107,6 +133,34 @@ from fitparse import FitFile
 # of where the script is invoked from (unlike --input-dir/--output-dir/etc.,
 # which are explicit user-supplied paths).
 DEFAULT_SCHEMA_PATH = Path(__file__).resolve().parents[2] / "data" / "schema" / "activity.schema.json"
+
+# A FIT position field is a signed 32-bit int representing a fraction of a
+# half-circle: 2**31 semicircles == 180 degrees.
+SEMICIRCLE_TO_DEGREES = 180 / (2 ** 31)
+
+# Explicit schema for every data/processed_tracks/<activity_id>.parquet
+# file (see issue #4). Writing the same schema for every activity --
+# including one with zero GPS points -- is what lets all of them be read
+# as a single logical table later (e.g. `SELECT * FROM
+# 'data/processed_tracks/*.parquet'` in DuckDB) without dtype mismatches
+# between files.
+TRACK_POINT_SCHEMA = pa.schema([
+    pa.field("activity_id", pa.string()),
+    # Parquet's timestamp logical type has no "seconds" unit -- pyarrow
+    # silently upcasts pa.timestamp("s") to "ms" on write, which would make
+    # the schema declared here permanently disagree with what's actually on
+    # disk. Confirmed by writing/reading back each unit directly: "ms",
+    # "us", and "ns" all round-trip exactly, "s" does not. "us" matches
+    # python's native datetime.datetime resolution.
+    pa.field("timestamp", pa.timestamp("us")),
+    pa.field("lat", pa.float64()),
+    pa.field("lon", pa.float64()),
+    pa.field("altitude_m", pa.float64()),
+    pa.field("heart_rate", pa.int32()),
+    pa.field("cadence", pa.int32()),
+    pa.field("speed_mps", pa.float64()),
+    pa.field("distance_m", pa.float64()),
+])
 
 # Sport-type groupings used to decide which metrics block to populate.
 # Extend these sets as real data reveals additional sport type strings.
@@ -206,9 +260,9 @@ def derive_activity_id(entry: Path) -> str:
 
 def parse_fit_file(filepath: Path) -> dict:
     """
-    Extract file_id, session-level, and record-level messages from a .fit
-    file. Transparently handles gzip-compressed .fit.gz files, which is
-    Strava's standard bulk export format.
+    Extract file_id, session-level, and per-point record-level messages from
+    a .fit file. Transparently handles gzip-compressed .fit.gz files, which
+    is Strava's standard bulk export format.
 
     The gzip stream is read fully into memory before FitFile touches it.
     fitparse reads lazily -- get_messages() below only actually consumes the
@@ -217,6 +271,15 @@ def parse_fit_file(filepath: Path) -> dict:
     calling get_messages() after that `with` block exits fails with
     "I/O operation on closed file". Reading the bytes up front avoids this
     and confirmed fixed against real .fit.gz files from the export.
+
+    "record" messages are the per-point time series (typically one every
+    few seconds) -- GPS position, altitude, heart rate, cadence, speed,
+    cumulative distance -- confirmed present in every real file sampled
+    during issue #4's investigation. Each is kept as a raw field-name/value
+    dict, in FIT's native units (e.g. position_lat/position_long as signed
+    semicircle ints); unit conversion happens downstream in
+    to_track_points(), not here, so this function's job stays "read the
+    file" rather than "map the file."
     """
     if filepath.suffix == ".gz":
         with gzip.open(filepath, "rb") as f:
@@ -235,7 +298,11 @@ def parse_fit_file(filepath: Path) -> dict:
         for field in record:
             session[field.name] = field.value
 
-    return {"file_id": file_id, "session": session}
+    records = []
+    for message in fitfile.get_messages("record"):
+        records.append({field.name: field.value for field in message})
+
+    return {"file_id": file_id, "session": session, "records": records}
 
 
 def guess_original_source(file_id: dict) -> str:
@@ -260,6 +327,21 @@ def guess_original_source(file_id: dict) -> str:
     if manufacturer and manufacturer != "strava":
         return manufacturer  # capture it even if not in our known enum yet
     return "unknown"
+
+
+def _has_real_gps_fix(records: list[dict]) -> bool:
+    """
+    True if at least one record message carries an actual GPS position.
+
+    Replaces the old gps_track_available guess (session.get("total_distance")
+    is not None), which just checked whether *any* distance was reported --
+    true for every ride regardless of GPS, since distance also comes from a
+    wheel/speed sensor. This checks the real record-level position fields
+    instead, confirmed present (or genuinely absent, e.g. the first few
+    points of a ride before GPS acquires a fix) against real data -- see
+    issue #4.
+    """
+    return any(r.get("position_lat") is not None and r.get("position_long") is not None for r in records)
 
 
 def to_standard_schema(raw: dict, entry: Path, fit_path: Path) -> dict:
@@ -312,7 +394,7 @@ def to_standard_schema(raw: dict, entry: Path, fit_path: Path) -> dict:
             "average_cadence": session.get("avg_cadence"),
             "average_power_w": session.get("avg_power"),
             "max_power_w": session.get("max_power"),
-            "gps_track_available": session.get("total_distance") is not None,
+            "gps_track_available": _has_real_gps_fix(raw.get("records", [])),
         }
     elif sport in STRENGTH_TYPES:
         activity["strength_metrics"] = {
@@ -329,6 +411,70 @@ def to_standard_schema(raw: dict, entry: Path, fit_path: Path) -> dict:
         }
 
     return activity
+
+
+def _first_non_null(record: dict, *keys: str):
+    """Return the first present-and-non-null value among `keys` in `record`, or None."""
+    for key in keys:
+        value = record.get(key)
+        if value is not None:
+            return value
+    return None
+
+
+def to_track_points(raw: dict, activity_id: str) -> list[dict]:
+    """
+    Map a FIT file's raw per-point `record` messages (raw["records"], see
+    parse_fit_file()) into the row shape written to
+    data/processed_tracks/<activity_id>.parquet (see issue #4).
+
+    GPS position isn't always present on the very first point(s) of a ride
+    -- confirmed against real data, where heart rate/cadence/speed/distance
+    report from the first point but position_lat/position_long stay absent
+    for several seconds while the device acquires a GPS fix. Those points
+    are kept (not dropped) with lat/lon left as None, rather than guessing
+    a position -- every other sensor reading for that timestamp is still
+    real data worth keeping.
+
+    Prefers the enhanced_* variants of altitude/speed when present (FIT's
+    higher-resolution fields, used by newer Garmin devices), falling back
+    to the base altitude/speed fields otherwise -- both were present and
+    numerically consistent with each other in every real file sampled.
+    """
+    points = []
+    for record in raw.get("records", []):
+        points.append({
+            "activity_id": activity_id,
+            "timestamp": record.get("timestamp"),
+            "lat": _semicircles_to_degrees(record.get("position_lat")),
+            "lon": _semicircles_to_degrees(record.get("position_long")),
+            "altitude_m": _first_non_null(record, "enhanced_altitude", "altitude"),
+            "heart_rate": record.get("heart_rate"),
+            "cadence": record.get("cadence"),
+            "speed_mps": _first_non_null(record, "enhanced_speed", "speed"),
+            "distance_m": record.get("distance"),
+        })
+    return points
+
+
+def _semicircles_to_degrees(value) -> float | None:
+    """Convert a FIT position field (semicircles) to decimal degrees, or None if absent."""
+    return value * SEMICIRCLE_TO_DEGREES if value is not None else None
+
+
+def write_track_points(track_points: list[dict], out_path: Path) -> None:
+    """
+    Write one activity's track points to a Parquet file, one row per FIT
+    record message, using the fixed TRACK_POINT_SCHEMA.
+
+    Always writes that same explicit schema -- including for an activity
+    with zero record messages, which still produces a valid, empty-but-
+    correctly-typed file -- rather than letting pyarrow infer a schema per
+    file, which is what keeps every file in data/processed_tracks/
+    concatenation-safe (see TRACK_POINT_SCHEMA's docstring).
+    """
+    table = pa.Table.from_pylist(track_points, schema=TRACK_POINT_SCHEMA)
+    pq.write_table(table, out_path)
 
 
 def load_activity_schema(schema_path: Path) -> dict:
@@ -453,6 +599,9 @@ def main():
                          help="Directory to write standardized JSON (one file per activity)")
     parser.add_argument("--processed-dir", required=True,
                          help="Directory to move successfully processed entries into")
+    parser.add_argument("--tracks-dir", default="data/processed_tracks",
+                         help="Directory to write per-activity track-point Parquet files "
+                         "(default: data/processed_tracks)")
     parser.add_argument("--log-dir", default="data/logs",
                          help="Directory for this batch's error log (default: data/logs)")
     parser.add_argument("--summary-dir", default="data/summaries",
@@ -468,10 +617,12 @@ def main():
     input_dir = Path(args.input_dir)
     output_dir = Path(args.output_dir)
     processed_dir = Path(args.processed_dir)
+    tracks_dir = Path(args.tracks_dir)
     log_dir = Path(args.log_dir)
     summary_dir = Path(args.summary_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     processed_dir.mkdir(parents=True, exist_ok=True)
+    tracks_dir.mkdir(parents=True, exist_ok=True)
     log_dir.mkdir(parents=True, exist_ok=True)
     summary_dir.mkdir(parents=True, exist_ok=True)
 
@@ -520,13 +671,24 @@ def main():
                 # Catches a mapping bug before it ever reaches disk -- see
                 # validate_against_schema()'s docstring for why this exists.
                 validate_against_schema(activity, activity_schema)
+                track_points = to_track_points(raw, activity["id"])
+
+                # Track Parquet write happens before the JSON write so that a
+                # failure here (the newer of the two write paths) leaves
+                # nothing behind in output_dir either -- both writes must
+                # succeed before the entry is considered done. Retrying a
+                # previously-failed entry overwrites both files cleanly
+                # (same activity id -> same filenames), so this ordering is
+                # about avoiding orphaned output on failure, not correctness.
+                track_out_path = tracks_dir / f"{activity['id']}.parquet"
+                write_track_points(track_points, track_out_path)
 
                 out_path = output_dir / f"{activity['id']}.json"
                 with open(out_path, "w") as f:
                     json.dump(activity, f, indent=2, default=str)
 
-                # Only move the source entry to processed/ after the JSON write
-                # above succeeds, so a crash mid-write can't lose an activity
+                # Only move the source entry to processed/ after both writes
+                # above succeed, so a crash mid-write can't lose an activity
                 # (it just stays in input_dir and gets retried next run).
                 shutil.move(str(entry), str(processed_dir / entry.name))
                 succeeded += 1

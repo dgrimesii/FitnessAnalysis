@@ -19,6 +19,10 @@ Covers, in order:
   4. A schema-conformance check that runs produced JSON through the actual
      data/schema/activity.schema.json via jsonschema, automating the
      "spot-check output against the schema" step called for in issue #1.
+  5. Track-point extraction and Parquet output (issue #4): GPS semicircle
+     conversion, points with a missing GPS fix, the enhanced_* field
+     fallback, a Parquet round-trip, and the gps_track_available fix
+     (real record-level GPS presence, not a total_distance guess).
 
 None of these tests touch real Strava export data or the H: drive --
 .fit.gz parsing is exercised via a fake FitFile stand-in (see
@@ -37,6 +41,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import jsonschema
+import pyarrow.parquet as pq
 import pytest
 
 import fit_parser
@@ -108,6 +113,18 @@ class FakeFitFile:
     _MESSAGES = {
         "file_id": [FakeMessage([FakeField("manufacturer", "garmin"), FakeField("garmin_product", "edge810")])],
         "session": [FakeMessage([FakeField("sport", "cycling"), FakeField("start_time", "2024-01-01T00:00:00")])],
+        "record": [
+            FakeMessage([
+                FakeField("timestamp", datetime(2024, 1, 1, 0, 0, 0)),
+                FakeField("position_lat", 420306253),
+                FakeField("position_long", -964454572),
+                FakeField("altitude", 147.4),
+                FakeField("heart_rate", 111),
+                FakeField("cadence", 45),
+                FakeField("speed", 2.325),
+                FakeField("distance", 2.33),
+            ]),
+        ],
     }
 
     def __init__(self, source):
@@ -258,10 +275,14 @@ def test_guess_original_source_missing_manufacturer_key():
 # to_standard_schema
 # ---------------------------------------------------------------------------
 
-def _raw(sport="cycling", manufacturer="garmin", **session_overrides):
+def _raw(sport="cycling", manufacturer="garmin", records=None, **session_overrides):
     session = {"sport": sport, "start_time": datetime(2024, 1, 1, tzinfo=timezone.utc)}
     session.update(session_overrides)
-    return {"file_id": {"manufacturer": manufacturer, "garmin_product": "edge810"}, "session": session}
+    return {
+        "file_id": {"manufacturer": manufacturer, "garmin_product": "edge810"},
+        "session": session,
+        "records": records if records is not None else [],
+    }
 
 
 def test_to_standard_schema_endurance_routing(tmp_path):
@@ -370,10 +391,10 @@ def test_parse_fit_file_reads_gzip_fully_before_fitfile_reads_messages(tmp_path,
 
     result = fit_parser.parse_fit_file(gz_path)
 
-    assert result == {
-        "file_id": {"manufacturer": "garmin", "garmin_product": "edge810"},
-        "session": {"sport": "cycling", "start_time": "2024-01-01T00:00:00"},
-    }
+    assert result["file_id"] == {"manufacturer": "garmin", "garmin_product": "edge810"}
+    assert result["session"] == {"sport": "cycling", "start_time": "2024-01-01T00:00:00"}
+    assert len(result["records"]) == 1
+    assert result["records"][0]["heart_rate"] == 111
 
 
 def test_parse_fit_file_uncompressed_fit_also_works(tmp_path, monkeypatch):
@@ -384,6 +405,124 @@ def test_parse_fit_file_uncompressed_fit_also_works(tmp_path, monkeypatch):
     result = fit_parser.parse_fit_file(fit_path)
 
     assert result["file_id"]["manufacturer"] == "garmin"
+
+
+# ---------------------------------------------------------------------------
+# to_track_points / write_track_points / gps_track_available (issue #4)
+# ---------------------------------------------------------------------------
+
+def test_to_track_points_converts_semicircles_to_degrees():
+    # 420306253/-964454572 semicircles is a real (lat, lon) pair sampled from the export (issue #4).
+    lat_semicircles, lon_semicircles = 420306253, -964454572
+    records = [{"timestamp": datetime(2024, 1, 1), "position_lat": lat_semicircles, "position_long": lon_semicircles}]
+    points = fit_parser.to_track_points({"records": records}, "activity_1")
+    assert points[0]["lat"] == pytest.approx(lat_semicircles * (180 / 2 ** 31))
+    assert points[0]["lon"] == pytest.approx(lon_semicircles * (180 / 2 ** 31))
+    # Sanity-check against the real-world range confirmed in issue #4's survey (North Carolina).
+    assert 34 < points[0]["lat"] < 36
+    assert -81 < points[0]["lon"] < -76
+
+
+def test_to_track_points_keeps_points_with_missing_gps_fix():
+    """
+    Regression for a real finding: a ride's first several points had
+    heart_rate/cadence/speed/distance but no position_lat/position_long yet
+    (normal GPS-acquisition lag) -- those points must be kept with lat/lon
+    as None, not dropped, since every other sensor reading is still real.
+    """
+    records = [{"timestamp": datetime(2024, 1, 1), "heart_rate": 88, "cadence": 0, "distance": 2.64}]
+    points = fit_parser.to_track_points({"records": records}, "activity_1")
+    assert len(points) == 1
+    assert points[0]["lat"] is None
+    assert points[0]["lon"] is None
+    assert points[0]["heart_rate"] == 88
+
+
+def test_to_track_points_prefers_enhanced_altitude_and_speed():
+    records = [{"timestamp": datetime(2024, 1, 1), "altitude": 100.0, "enhanced_altitude": 100.4,
+                "speed": 2.3, "enhanced_speed": 2.325}]
+    points = fit_parser.to_track_points({"records": records}, "activity_1")
+    assert points[0]["altitude_m"] == 100.4
+    assert points[0]["speed_mps"] == 2.325
+
+
+def test_to_track_points_falls_back_to_base_altitude_and_speed_when_enhanced_absent():
+    records = [{"timestamp": datetime(2024, 1, 1), "altitude": 100.0, "speed": 2.3}]
+    points = fit_parser.to_track_points({"records": records}, "activity_1")
+    assert points[0]["altitude_m"] == 100.0
+    assert points[0]["speed_mps"] == 2.3
+
+
+def test_to_track_points_activity_id_is_attached_to_every_row():
+    records = [{"timestamp": datetime(2024, 1, 1)}, {"timestamp": datetime(2024, 1, 1, 0, 0, 1)}]
+    points = fit_parser.to_track_points({"records": records}, "activity_42")
+    assert [p["activity_id"] for p in points] == ["activity_42", "activity_42"]
+
+
+def test_to_track_points_handles_missing_records_key():
+    """raw dicts built by lightweight test doubles that omit "records" shouldn't crash this."""
+    assert fit_parser.to_track_points({}, "activity_1") == []
+
+
+def test_write_track_points_round_trips_through_parquet(tmp_path):
+    points = [{
+        "activity_id": "activity_1", "timestamp": datetime(2024, 1, 1, 12, 0, 0),
+        "lat": 35.229757, "lon": -80.839731, "altitude_m": 147.4,
+        "heart_rate": 111, "cadence": 45, "speed_mps": 2.325, "distance_m": 2.33,
+    }]
+    out_path = tmp_path / "activity_1.parquet"
+
+    fit_parser.write_track_points(points, out_path)
+
+    table = pq.read_table(out_path)
+    assert table.schema.equals(fit_parser.TRACK_POINT_SCHEMA)
+    row = table.to_pylist()[0]
+    assert row["activity_id"] == "activity_1"
+    assert row["heart_rate"] == 111
+    assert row["lat"] == pytest.approx(35.229757)
+
+
+def test_write_track_points_handles_zero_points(tmp_path):
+    """An activity with no record messages still gets a valid, correctly-typed (empty) Parquet file."""
+    out_path = tmp_path / "activity_empty.parquet"
+    fit_parser.write_track_points([], out_path)
+    table = pq.read_table(out_path)
+    assert table.num_rows == 0
+    assert table.schema.equals(fit_parser.TRACK_POINT_SCHEMA)
+
+
+@pytest.mark.parametrize(
+    "records, expected",
+    [
+        ([{"position_lat": 420306253, "position_long": -964454572}], True),
+        ([{"heart_rate": 88}], False),  # no GPS field at all on this point
+        ([{"position_lat": None, "position_long": None}], False),  # keys present but null
+        ([], False),
+    ],
+)
+def test_has_real_gps_fix(records, expected):
+    assert fit_parser._has_real_gps_fix(records) is expected
+
+
+def test_to_standard_schema_gps_track_available_reflects_real_gps_not_total_distance(tmp_path):
+    """
+    Regression test for the gps_track_available fix: the old guess
+    (session.get("total_distance") is not None) would say True here even
+    though there's no real GPS fix anywhere in the ride -- distance can
+    also come from a wheel/speed sensor with no GPS at all. The new check
+    looks at the actual record-level position fields instead.
+    """
+    entry = tmp_path / "1.fit.gz"
+    raw = _raw(sport="cycling", total_distance=5000.0, records=[{"heart_rate": 120, "cadence": 80}])
+    activity = fit_parser.to_standard_schema(raw, entry, entry)
+    assert activity["endurance_metrics"]["gps_track_available"] is False
+
+
+def test_to_standard_schema_gps_track_available_true_when_gps_present(tmp_path):
+    entry = tmp_path / "1.fit.gz"
+    raw = _raw(sport="cycling", records=[{"position_lat": 420306253, "position_long": -964454572}])
+    activity = fit_parser.to_standard_schema(raw, entry, entry)
+    assert activity["endurance_metrics"]["gps_track_available"] is True
 
 
 # ---------------------------------------------------------------------------
@@ -468,6 +607,7 @@ def batch_workspace(tmp_path):
     input_dir = tmp_path / "activities"
     output_dir = tmp_path / "data" / "processed"
     processed_dir = tmp_path / "processed"
+    tracks_dir = tmp_path / "data" / "processed_tracks"
     log_dir = tmp_path / "data" / "logs"
     summary_dir = tmp_path / "data" / "summaries"
 
@@ -479,7 +619,7 @@ def batch_workspace(tmp_path):
 
     return {
         "input_dir": input_dir, "output_dir": output_dir, "processed_dir": processed_dir,
-        "log_dir": log_dir, "summary_dir": summary_dir,
+        "tracks_dir": tracks_dir, "log_dir": log_dir, "summary_dir": summary_dir,
     }
 
 
@@ -497,7 +637,9 @@ def test_main_end_to_end_batch(batch_workspace, monkeypatch):
         if "bad" in filepath.name:
             raise ValueError("simulated corrupt FIT data")
         return {"file_id": {"manufacturer": "garmin", "garmin_product": "edge810"},
-                "session": {"sport": "cycling", "start_time": "2024-01-01T00:00:00"}}
+                "session": {"sport": "cycling", "start_time": "2024-01-01T00:00:00"},
+                "records": [{"timestamp": datetime(2024, 1, 1), "position_lat": 420306253,
+                             "position_long": -964454572, "heart_rate": 111}]}
 
     monkeypatch.setattr(fit_parser, "parse_fit_file", fake_parse_fit_file)
     monkeypatch.setattr(sys, "argv", [
@@ -505,6 +647,7 @@ def test_main_end_to_end_batch(batch_workspace, monkeypatch):
         "--input-dir", str(ws["input_dir"]),
         "--output-dir", str(ws["output_dir"]),
         "--processed-dir", str(ws["processed_dir"]),
+        "--tracks-dir", str(ws["tracks_dir"]),
         "--log-dir", str(ws["log_dir"]),
         "--summary-dir", str(ws["summary_dir"]),
     ])
@@ -516,6 +659,14 @@ def test_main_end_to_end_batch(batch_workspace, monkeypatch):
     assert [f.name for f in output_files] == ["good_1.json"]
     assert (ws["processed_dir"] / "good_1.fit.gz").exists()
     assert not (ws["input_dir"] / "good_1.fit.gz").exists()
+
+    # Track Parquet written only for the succeeded entry, with the point
+    # data from fake_parse_fit_file's "records" correctly carried through.
+    track_files = list(ws["tracks_dir"].glob("*.parquet"))
+    assert [f.name for f in track_files] == ["good_1.parquet"]
+    track_table = pq.read_table(track_files[0])
+    assert track_table.num_rows == 1
+    assert track_table.to_pylist()[0]["heart_rate"] == 111
 
     # Failed: left in place, not moved.
     assert (ws["input_dir"] / "bad_1.fit.gz").exists()
@@ -560,7 +711,8 @@ def test_main_treats_schema_invalid_output_as_a_failure(batch_workspace, monkeyp
 
     def fake_parse_fit_file(filepath):
         return {"file_id": {"manufacturer": "garmin", "garmin_product": "edge810"},
-                "session": {"sport": "cycling", "start_time": "2024-01-01T00:00:00"}}
+                "session": {"sport": "cycling", "start_time": "2024-01-01T00:00:00"},
+                "records": [{"timestamp": datetime(2024, 1, 1), "heart_rate": 111}]}
 
     real_to_standard_schema = fit_parser.to_standard_schema
 
@@ -579,6 +731,7 @@ def test_main_treats_schema_invalid_output_as_a_failure(batch_workspace, monkeyp
         "--input-dir", str(ws["input_dir"]),
         "--output-dir", str(ws["output_dir"]),
         "--processed-dir", str(ws["processed_dir"]),
+        "--tracks-dir", str(ws["tracks_dir"]),
         "--log-dir", str(ws["log_dir"]),
         "--summary-dir", str(ws["summary_dir"]),
     ])
@@ -590,9 +743,12 @@ def test_main_treats_schema_invalid_output_as_a_failure(batch_workspace, monkeyp
     assert (ws["processed_dir"] / "good_1.fit.gz").exists()
 
     # bad_1 "parsed" fine but mapped to schema-invalid JSON: treated as a
-    # failure, nothing written for it, source left in place.
+    # failure, nothing written for it (JSON or track Parquet), source left
+    # in place.
     assert (ws["input_dir"] / "bad_1.fit.gz").exists()
     assert not (ws["output_dir"] / "bad_1.json").exists()
+    assert not (ws["tracks_dir"] / "bad_1.parquet").exists()
+    assert [f.name for f in ws["tracks_dir"].glob("*.parquet")] == ["good_1.parquet"]
 
     log_content = next(ws["log_dir"].glob("batch_*.log")).read_text(encoding="utf-8")
     assert "FAILED bad_1.fit.gz" in log_content
@@ -612,12 +768,14 @@ def test_batch_size_limits_entries_processed_this_run(tmp_path, monkeypatch):
     monkeypatch.setattr(fit_parser, "parse_fit_file", lambda filepath: {
         "file_id": {"manufacturer": "garmin"},
         "session": {"sport": "cycling", "start_time": "2024-01-01T00:00:00"},
+        "records": [],
     })
     monkeypatch.setattr(sys, "argv", [
         "fit_parser.py",
         "--input-dir", str(input_dir),
         "--output-dir", str(tmp_path / "out"),
         "--processed-dir", str(tmp_path / "processed"),
+        "--tracks-dir", str(tmp_path / "tracks"),
         "--log-dir", str(tmp_path / "logs"),
         "--summary-dir", str(tmp_path / "summaries"),
         "--batch-size", "2",
