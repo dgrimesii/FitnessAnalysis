@@ -13,6 +13,9 @@ Usage:
     pip install fitparse
     python fit_parser.py --input-dir /path/to/fit_files --output-dir ../../data/processed
 
+Accepts both raw .fit files and gzip-compressed .fit.gz files (Strava's
+standard bulk export format uses .fit.gz).
+
 Notes:
     - This is a first-pass stub. It has not yet been run against real data,
       since files live in the user's Google Drive and aren't accessible from
@@ -22,6 +25,7 @@ Notes:
 """
 
 import argparse
+import gzip
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -39,8 +43,16 @@ CLASS_TYPES = {"fitness_equipment", "cardio_training"}  # common Peloton FIT spo
 
 
 def parse_fit_file(filepath: Path) -> dict:
-    """Extract file_id, session-level, and record-level messages from a .fit file."""
-    fitfile = FitFile(str(filepath))
+    """
+    Extract file_id, session-level, and record-level messages from a .fit
+    file. Transparently handles gzip-compressed .fit.gz files, which is
+    Strava's standard bulk export format.
+    """
+    if filepath.suffix == ".gz":
+        with gzip.open(filepath, "rb") as f:
+            fitfile = FitFile(f)
+    else:
+        fitfile = FitFile(str(filepath))
 
     file_id = {}
     for record in fitfile.get_messages("file_id"):
@@ -81,9 +93,16 @@ def to_standard_schema(raw: dict, filepath: Path) -> dict:
     file_id = raw["file_id"]
     sport = str(session.get("sport", "unknown")).lower()
 
+    # filepath.stem only strips one suffix, so "12345.fit.gz" -> "12345.fit".
+    # Strip both to get a clean id.
+    activity_id = filepath.name
+    for suffix in (".gz", ".fit"):
+        if activity_id.endswith(suffix):
+            activity_id = activity_id[: -len(suffix)]
+
     start_time = session.get("start_time")
     activity = {
-        "id": filepath.stem,
+        "id": activity_id,
         "source": "strava",
         "original_source": guess_original_source(file_id),
         "activity_type": session.get("sport", "unknown"),
@@ -141,15 +160,15 @@ def main():
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    fit_files = sorted(input_dir.glob("*.fit"))
-    print(f"Found {len(fit_files)} .fit files in {input_dir}")
+    fit_files = sorted(list(input_dir.glob("*.fit")) + list(input_dir.glob("*.fit.gz")))
+    print(f"Found {len(fit_files)} .fit/.fit.gz files in {input_dir}")
 
     errors = []
     for i, filepath in enumerate(fit_files, 1):
         try:
             raw = parse_fit_file(filepath)
             activity = to_standard_schema(raw, filepath)
-            out_path = output_dir / f"{filepath.stem}.json"
+            out_path = output_dir / f"{activity['id']}.json"
             with open(out_path, "w") as f:
                 json.dump(activity, f, indent=2, default=str)
         except Exception as e:
