@@ -62,6 +62,14 @@ shape/format yet. Skips and failures are both left in place in --input-dir
 and both show up in the batch log/summary, but are counted and reported
 separately so a skip doesn't read as something broken.
 
+The `name` field is resolved from Strava's activities.csv (--activities-csv,
+default: next to --input-dir's parent, matching the real export layout),
+via load_activity_names() in backfill_activity_names.py -- see issue #6.
+Neither FIT nor TCX carries an activity title in the payload file itself.
+A missing/unreadable activities.csv degrades gracefully (every name stays
+null, a warning is printed) rather than failing the batch, since this is
+an enhancement, not something the rest of the pipeline depends on.
+
 Usage:
     pip install -r requirements.txt
     python fit_parser.py \\
@@ -71,6 +79,7 @@ Usage:
         --tracks-dir ../../data/processed_tracks \\
         --log-dir ../../data/logs \\
         --summary-dir ../../data/summaries \\
+        --activities-csv "H:\\My Drive\\David Personal\\Athletics\\export_3219872\\activities.csv" \\
         --batch-size 200
 
 Validated against real data:
@@ -144,6 +153,8 @@ import jsonschema
 import pyarrow as pa
 import pyarrow.parquet as pq
 from fitparse import FitFile
+
+from backfill_activity_names import load_activity_names
 
 # Default location of the activity JSON schema, resolved relative to this
 # file rather than the current working directory so it's correct regardless
@@ -564,8 +575,18 @@ def _has_real_gps_fix(records: list[dict]) -> bool:
     return any(r.get("position_lat") is not None and r.get("position_long") is not None for r in records)
 
 
-def to_standard_schema(raw: dict, entry: Path, payload_path: Path) -> dict:
-    """Map raw file_id/session data (from parse_fit_file() or _tcx_to_raw()) into the standardized activity schema."""
+def to_standard_schema(raw: dict, entry: Path, payload_path: Path, activity_name: str | None = None) -> dict:
+    """
+    Map raw file_id/session data (from parse_fit_file() or _tcx_to_raw())
+    into the standardized activity schema.
+
+    `activity_name` is resolved by the caller from Strava's activities.csv
+    (see issue #6/load_activity_names() in backfill_activity_names.py) --
+    neither FIT's session message nor TCX's Lap block carries a title, so
+    this function has no way to derive one on its own. Defaults to None so
+    existing callers that don't have a name lookup available (e.g. tests
+    calling this directly) keep working unchanged.
+    """
     session = raw["session"]
     file_id = raw["file_id"]
     sport = str(session.get("sport", "unknown")).lower()
@@ -584,7 +605,7 @@ def to_standard_schema(raw: dict, entry: Path, payload_path: Path) -> dict:
         "source": "strava",
         "original_source": original_source,
         "activity_type": session.get("sport", "unknown"),
-        "name": None,  # Strava activity names aren't stored in the FIT/TCX file itself
+        "name": activity_name,  # from activities.csv -- not stored in the FIT/TCX file itself
         "start_time": start_time.isoformat() if hasattr(start_time, "isoformat") else start_time,
         "timezone": None,
         "elapsed_time_s": session.get("total_elapsed_time"),
@@ -854,6 +875,11 @@ def main():
     parser.add_argument("--schema-path", default=str(DEFAULT_SCHEMA_PATH),
                          help="Path to the activity JSON schema used to validate every record "
                          "before it's written (default: data/schema/activity.schema.json in this repo)")
+    parser.add_argument("--activities-csv", default=None,
+                         help="Path to Strava's activities.csv, the source for the 'name' field "
+                         "(see issue #6). Default: activities.csv next to --input-dir's parent, "
+                         "matching the real export layout. Missing/unreadable degrades gracefully "
+                         "to every name staying null, rather than failing the batch.")
     parser.add_argument("--batch-size", type=int, default=None,
                          help="Max number of entries to process this run. "
                          "Omit to process all remaining entries in --input-dir.")
@@ -876,6 +902,18 @@ def main():
     # is a setup problem, not a per-entry one -- let it raise here rather
     # than being swallowed by the per-entry try/except further down.
     activity_schema = load_activity_schema(Path(args.schema_path))
+
+    # Unlike the schema (required for core data integrity), a missing or
+    # unreadable activities.csv degrades gracefully: every name just stays
+    # null, same as before issue #6, rather than failing the whole batch --
+    # this is an enhancement, not something the pipeline depends on.
+    activities_csv_path = Path(args.activities_csv) if args.activities_csv else input_dir.parent / "activities.csv"
+    try:
+        activity_names = load_activity_names(activities_csv_path)
+        print(f"Loaded {len(activity_names)} activity names from {activities_csv_path}")
+    except OSError as e:
+        activity_names = {}
+        print(f"WARNING: could not read {activities_csv_path} ({e}) -- names will be null this run")
 
     batch_id = make_batch_id()
     logger, log_path = setup_batch_logger(log_dir, batch_id)
@@ -912,7 +950,12 @@ def main():
                     raise ValueError("no supported payload found in this entry")
 
                 raw = parse_activity_payload(payload_path)
-                activity = to_standard_schema(raw, entry, payload_path)
+                # Keyed by the payload's actual filename (not entry.name),
+                # matching activities.csv's Filename column semantics even
+                # for the archive-folder shape (entry is the folder, the
+                # payload is the file inside it) -- see issue #6.
+                activity_name = activity_names.get(payload_path.name)
+                activity = to_standard_schema(raw, entry, payload_path, activity_name=activity_name)
                 # Catches a mapping bug before it ever reaches disk -- see
                 # validate_against_schema()'s docstring for why this exists.
                 validate_against_schema(activity, activity_schema)

@@ -43,6 +43,7 @@ straightforward to construct correctly.
 
 from __future__ import annotations
 
+import csv
 import gzip
 import json
 import logging
@@ -506,6 +507,19 @@ def test_to_standard_schema_start_time_handles_datetime_and_plain_string(tmp_pat
 
     str_activity = fit_parser.to_standard_schema(_raw(start_time="2024-05-01T00:00:00"), entry, entry)
     assert str_activity["start_time"] == "2024-05-01T00:00:00"
+
+
+def test_to_standard_schema_name_defaults_to_none(tmp_path):
+    """Neither FIT nor TCX carries a title -- callers with no name lookup available (e.g. this one) get null, as before issue #6."""
+    entry = tmp_path / "1.fit.gz"
+    activity = fit_parser.to_standard_schema(_raw(), entry, entry)
+    assert activity["name"] is None
+
+
+def test_to_standard_schema_uses_activity_name_when_given(tmp_path):
+    entry = tmp_path / "1.fit.gz"
+    activity = fit_parser.to_standard_schema(_raw(), entry, entry, activity_name="Morning Commute")
+    assert activity["name"] == "Morning Commute"
 
 
 def test_sport_type_groupings_do_not_overlap():
@@ -1136,8 +1150,8 @@ def test_main_treats_schema_invalid_output_as_a_failure(batch_workspace, monkeyp
 
     real_to_standard_schema = fit_parser.to_standard_schema
 
-    def fake_to_standard_schema(raw, entry, fit_path):
-        activity = real_to_standard_schema(raw, entry, fit_path)
+    def fake_to_standard_schema(raw, entry, fit_path, activity_name=None):
+        activity = real_to_standard_schema(raw, entry, fit_path, activity_name=activity_name)
         if "bad" in entry.name:
             # Simulate a mapping bug producing a schema-invalid field, the
             # same shape as the real elapsed_time_s mismatch found earlier.
@@ -1207,6 +1221,109 @@ def test_batch_size_limits_entries_processed_this_run(tmp_path, monkeypatch):
 
     assert len(list((tmp_path / "processed").iterdir())) == 2
     assert len(list(input_dir.glob("*.fit.gz"))) == 3  # 5 - 2 processed
+
+
+def _write_activities_csv(path: Path, rows: list[dict]) -> Path:
+    fieldnames = sorted({key for row in rows for key in row})
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+    return path
+
+
+def test_main_resolves_names_from_explicit_activities_csv(tmp_path, monkeypatch):
+    """End-to-end (issue #6): --activities-csv is loaded once per batch and joined by payload filename."""
+    input_dir = tmp_path / "activities"
+    make_fit_gz(input_dir / "good_1.fit.gz")
+    csv_path = _write_activities_csv(tmp_path / "activities.csv", [
+        {"Filename": "activities/good_1.fit.gz", "Activity Name": "Morning Commute"},
+    ])
+
+    monkeypatch.setattr(fit_parser, "parse_fit_file", lambda filepath: {
+        "file_id": {"manufacturer": "garmin"},
+        "session": {"sport": "cycling", "start_time": "2024-01-01T00:00:00"},
+        "records": [],
+    })
+    monkeypatch.setattr(sys, "argv", [
+        "fit_parser.py",
+        "--input-dir", str(input_dir),
+        "--output-dir", str(tmp_path / "out"),
+        "--processed-dir", str(tmp_path / "processed"),
+        "--tracks-dir", str(tmp_path / "tracks"),
+        "--log-dir", str(tmp_path / "logs"),
+        "--summary-dir", str(tmp_path / "summaries"),
+        "--activities-csv", str(csv_path),
+    ])
+
+    fit_parser.main()
+
+    activity = json.loads((tmp_path / "out" / "good_1.json").read_text(encoding="utf-8"))
+    assert activity["name"] == "Morning Commute"
+
+
+def test_main_resolves_activities_csv_next_to_input_dirs_parent_by_default(tmp_path, monkeypatch):
+    """
+    No --activities-csv given -> defaults to activities.csv next to
+    --input-dir's parent, matching the real export layout
+    (export_root/activities/ and export_root/activities.csv siblings).
+    """
+    export_root = tmp_path / "export_3219872"
+    input_dir = export_root / "activities"
+    make_fit_gz(input_dir / "good_1.fit.gz")
+    _write_activities_csv(export_root / "activities.csv", [
+        {"Filename": "activities/good_1.fit.gz", "Activity Name": "Evening Commute"},
+    ])
+
+    monkeypatch.setattr(fit_parser, "parse_fit_file", lambda filepath: {
+        "file_id": {"manufacturer": "garmin"},
+        "session": {"sport": "cycling", "start_time": "2024-01-01T00:00:00"},
+        "records": [],
+    })
+    monkeypatch.setattr(sys, "argv", [
+        "fit_parser.py",
+        "--input-dir", str(input_dir),
+        "--output-dir", str(tmp_path / "out"),
+        "--processed-dir", str(tmp_path / "processed"),
+        "--tracks-dir", str(tmp_path / "tracks"),
+        "--log-dir", str(tmp_path / "logs"),
+        "--summary-dir", str(tmp_path / "summaries"),
+        # no --activities-csv
+    ])
+
+    fit_parser.main()
+
+    activity = json.loads((tmp_path / "out" / "good_1.json").read_text(encoding="utf-8"))
+    assert activity["name"] == "Evening Commute"
+
+
+def test_main_missing_activities_csv_degrades_to_null_names_not_a_batch_failure(tmp_path, monkeypatch, capsys):
+    """A missing/unreadable activities.csv must not fail the batch -- names just stay null, with a warning printed."""
+    input_dir = tmp_path / "activities"
+    make_fit_gz(input_dir / "good_1.fit.gz")
+
+    monkeypatch.setattr(fit_parser, "parse_fit_file", lambda filepath: {
+        "file_id": {"manufacturer": "garmin"},
+        "session": {"sport": "cycling", "start_time": "2024-01-01T00:00:00"},
+        "records": [],
+    })
+    monkeypatch.setattr(sys, "argv", [
+        "fit_parser.py",
+        "--input-dir", str(input_dir),
+        "--output-dir", str(tmp_path / "out"),
+        "--processed-dir", str(tmp_path / "processed"),
+        "--tracks-dir", str(tmp_path / "tracks"),
+        "--log-dir", str(tmp_path / "logs"),
+        "--summary-dir", str(tmp_path / "summaries"),
+        "--activities-csv", str(tmp_path / "does_not_exist.csv"),
+    ])
+
+    fit_parser.main()
+
+    activity = json.loads((tmp_path / "out" / "good_1.json").read_text(encoding="utf-8"))
+    assert activity["name"] is None
+    assert (tmp_path / "processed" / "good_1.fit.gz").exists()  # batch still succeeded overall
+    assert "WARNING" in capsys.readouterr().out
 
 
 # ---------------------------------------------------------------------------
