@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eleven Years, Two Very Different Riders</title>
+<style>
+  :root {
+    --surface: #F0F1EE;
+    --surface-card: #FAFAF8;
+    --surface-sunken: #E6E7E2;
+    --ink: #221E1A;
+    --ink-secondary: #4A443C;
+    --ink-muted: #7B7466;
+    --border: #DEDBD3;
+    --accent: #B8720A;
+    --accent-wash: rgba(184, 114, 10, 0.10);
+    --accent2: #0B5D91;
+    --accent2-wash: rgba(11, 93, 145, 0.10);
+    --accent3: #4E7A3A;
+    --accent3-wash: rgba(78, 122, 58, 0.10);
+    --grid-line: #D7D4CB;
+    --shadow: 0 1px 2px rgba(34, 30, 26, 0.06), 0 4px 16px rgba(34, 30, 26, 0.04);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface: #1B1815;
+      --surface-card: #232019;
+      --surface-sunken: #15130F;
+      --ink: #EDE7DD;
+      --ink-secondary: #C2BAAB;
+      --ink-muted: #8A8377;
+      --border: #34302A;
+      --accent: #C4863A;
+      --accent-wash: rgba(196, 134, 58, 0.14);
+      --accent2: #3391D6;
+      --accent2-wash: rgba(51, 145, 214, 0.14);
+      --accent3: #6FA050;
+      --accent3-wash: rgba(111, 160, 80, 0.14);
+      --grid-line: #302C25;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+  }
+  :root[data-theme="dark"] {
+    --surface: #1B1815; --surface-card: #232019; --surface-sunken: #15130F;
+    --ink: #EDE7DD; --ink-secondary: #C2BAAB; --ink-muted: #8A8377;
+    --border: #34302A; --accent: #C4863A; --accent-wash: rgba(196, 134, 58, 0.14);
+    --accent2: #3391D6; --accent2-wash: rgba(51, 145, 214, 0.14);
+    --accent3: #6FA050; --accent3-wash: rgba(111, 160, 80, 0.14);
+    --grid-line: #302C25; --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+  :root[data-theme="light"] {
+    --surface: #F0F1EE; --surface-card: #FAFAF8; --surface-sunken: #E6E7E2;
+    --ink: #221E1A; --ink-secondary: #4A443C; --ink-muted: #7B7466;
+    --border: #DEDBD3; --accent: #B8720A; --accent-wash: rgba(184, 114, 10, 0.10);
+    --accent2: #0B5D91; --accent2-wash: rgba(11, 93, 145, 0.10);
+    --accent3: #4E7A3A; --accent3-wash: rgba(78, 122, 58, 0.10);
+    --grid-line: #D7D4CB; --shadow: 0 1px 2px rgba(34, 30, 26, 0.06), 0 4px 16px rgba(34, 30, 26, 0.04);
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--surface);
+    color: var(--ink);
+  }
+  body {
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  .serif {
+    font-family: Charter, "Iowan Old Style", Georgia, "Times New Roman", serif;
+  }
+
+  a { color: var(--accent); }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 3.5rem 1.75rem 5rem;
+  }
+
+  /* ---------- Header ---------- */
+  header.hero {
+    margin-bottom: 3rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .eyebrow {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.9rem;
+  }
+  h1.title {
+    font-family: Charter, "Iowan Old Style", Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(2rem, 4.2vw, 3.1rem);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0 0 1rem;
+    max-width: 18ch;
+    text-wrap: balance;
+  }
+  .dek {
+    font-family: Charter, "Iowan Old Style", Georgia, serif;
+    font-size: 1.2rem;
+    line-height: 1.5;
+    color: var(--ink-secondary);
+    max-width: 52ch;
+    margin: 0;
+  }
+
+  /* ---------- Stat tiles ---------- */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 2.25rem 0 0;
+  }
+  .stat-tile {
+    background: var(--surface-card);
+    padding: 1.1rem 1rem;
+    min-width: 0;
+  }
+  .stat-value {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-weight: 650;
+    font-size: 1.5rem;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .stat-sub {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+    margin-top: 0.15rem;
+  }
+  .stat-label {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-top: 0.5rem;
+  }
+
+  /* ---------- Sections ---------- */
+  section.chapter {
+    margin-top: 4.5rem;
+  }
+  section.chapter .eyebrow { color: var(--ink-muted); }
+  section.chapter.indoor .eyebrow { color: var(--accent2); }
+  section.chapter.recovery .eyebrow { color: var(--accent3); }
+  h2.chapter-title {
+    font-family: Charter, "Iowan Old Style", Georgia, serif;
+    font-weight: 400;
+    font-size: 1.85rem;
+    line-height: 1.2;
+    margin: 0 0 1rem;
+    max-width: 22ch;
+    text-wrap: balance;
+  }
+  .prose {
+    font-family: Charter, "Iowan Old Style", Georgia, serif;
+    font-size: 1.06rem;
+    line-height: 1.65;
+    color: var(--ink-secondary);
+    max-width: 64ch;
+    margin: 0 0 1.75rem;
+  }
+  .prose strong { color: var(--ink); font-weight: 600; }
+  .prose .callout {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 0.82rem;
+    color: var(--ink-muted);
+    display: block;
+    margin-top: 0.9rem;
+    padding-left: 0.9rem;
+    border-left: 2px solid var(--border);
+  }
+
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+  .chart-grid.single { grid-template-columns: 1fr; }
+  @media (max-width: 760px) {
+    .chart-grid { grid-template-columns: 1fr; }
+    .stat-row { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .chart-card {
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.35rem 1.35rem 1.1rem;
+    box-shadow: var(--shadow);
+  }
+  .chart-card.blue { border-top: 2px solid var(--accent2); }
+  .chart-card.amber { border-top: 2px solid var(--accent); }
+  .chart-card.green { border-top: 2px solid var(--accent3); }
+  .chart-legend {
+    display: flex; gap: 1.1rem; margin: 0 0 0.6rem;
+    font-family: -apple-system, "Segoe UI", sans-serif; font-size: 0.76rem; color: var(--ink-secondary);
+  }
+  .chart-legend .key { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .chart-legend .swatch { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
+  .chart-legend .swatch.blue { background: var(--accent2); }
+  .chart-legend .swatch.green { background: var(--accent3); }
+
+  .timeline-card { margin-top: 1.25rem; }
+  .timeline-card code {
+    font-family: Consolas, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    background: var(--surface-sunken);
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+  }
+  .timeline-list {
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0 0 0 1.1rem;
+    border-left: 2px solid var(--border);
+  }
+  .timeline-list li {
+    position: relative;
+    padding-bottom: 1.25rem;
+  }
+  .timeline-list li:last-child { padding-bottom: 0; }
+  .timeline-list li::before {
+    content: "";
+    position: absolute;
+    left: -1.43rem;
+    top: 0.3rem;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--accent3);
+    border: 2px solid var(--surface-card);
+  }
+  .timeline-date {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--accent3);
+  }
+  .timeline-title {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--ink);
+    margin: 0.15rem 0 0.2rem;
+  }
+  .timeline-desc {
+    font-family: Charter, "Iowan Old Style", Georgia, serif;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--ink-secondary);
+    max-width: 60ch;
+    margin: 0;
+  }
+
+  .chart-marker-line { stroke: var(--ink-muted); stroke-width: 1.5; stroke-dasharray: 3 3; }
+  .chart-marker-label {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    fill: var(--ink-secondary);
+  }
+  .chart-annotation {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 9.5px;
+    font-weight: 600;
+    fill: var(--ink);
+  }
+  .chart-title {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--ink);
+    margin: 0 0 0.15rem;
+  }
+  .chart-subtitle {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 0.76rem;
+    color: var(--ink-muted);
+    margin: 0 0 0.75rem;
+  }
+
+  svg.chart { display: block; width: 100%; height: auto; overflow: visible; }
+  .bar { fill: var(--accent); cursor: pointer; }
+  .bar.blue { fill: var(--accent2); }
+  .bar.green { fill: var(--accent3); }
+  .bar:hover, .bar.hovered { filter: brightness(1.12); }
+  .bar:focus-visible, .hit-col:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .axis-tick {
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 9.5px;
+    fill: var(--ink-muted);
+  }
+  .axis-tick.tabular { font-variant-numeric: tabular-nums; }
+  .gridline { stroke: var(--grid-line); stroke-width: 1; }
+  .chart-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .chart-line.blue { stroke: var(--accent2); }
+  .chart-dot { fill: var(--accent); stroke: var(--surface-card); stroke-width: 2; }
+  .chart-dot.blue { fill: var(--accent2); }
+  .crosshair { stroke: var(--ink-muted); stroke-width: 1; stroke-dasharray: 2 2; opacity: 0; pointer-events: none; }
+  .hit-col { fill: transparent; }
+
+  .tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--ink);
+    color: var(--surface);
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 0.78rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transition: opacity 0.08s ease;
+    z-index: 10;
+    white-space: nowrap;
+  }
+  .tooltip .tt-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .tooltip .tt-label { color: var(--ink-muted); margin-left: 0.35rem; }
+  .chart-wrap { position: relative; }
+
+  /* ---------- Table ---------- */
+  details.data-table { margin-top: 4rem; }
+  details.data-table summary {
+    cursor: pointer;
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--ink);
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--border);
+    outline: none;
+  }
+  details.data-table summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .table-wrap { overflow-x: auto; margin-top: 0.75rem; }
+  table.yeardata {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 0.82rem;
+    font-variant-numeric: tabular-nums;
+  }
+  table.yeardata th, table.yeardata td {
+    text-align: right;
+    padding: 0.45rem 0.7rem;
+    border-bottom: 1px solid var(--border);
+  }
+  table.yeardata th:first-child, table.yeardata td:first-child { text-align: left; }
+  table.yeardata th {
+    font-weight: 600;
+    color: var(--ink-muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* ---------- Footer ---------- */
+  footer.methodology {
+    margin-top: 4rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--border);
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--ink-muted);
+    max-width: 68ch;
+  }
+  footer.methodology p { margin: 0 0 0.75rem; }
+
+  /* ---------- Load state ---------- */
+  #load-error {
+    display: none;
+    max-width: 720px;
+    margin: 3.5rem auto;
+    padding: 1.5rem 1.75rem;
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    font-family: -apple-system, "Segoe UI", sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  #load-error h2 { margin: 0 0 0.5rem; font-size: 1.05rem; }
+  #load-error code {
+    font-family: Consolas, "SF Mono", Menlo, monospace;
+    font-size: 0.82rem;
+    background: var(--surface-sunken);
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div id="load-error">
+  <h2>Couldn't load the dashboard data</h2>
+  <p id="load-error-detail"></p>
+  <p>This page reads local project files with <code>fetch()</code>, which browsers only allow when the page itself is served over <code>http://</code> &mdash; not opened directly as a <code>file://</code> path. Open it via VS Code's <strong>Live Server</strong> extension (right-click <code>dashboard.html</code> &rarr; "Open with Live Server") or run <code>python -m http.server</code> from the repo root, rather than double-clicking the file.</p>
+</div>
+
+<div class="page" id="page" style="display:none;">
+
+  <header class="hero">
+    <p class="eyebrow" id="eyebrow-summary">&nbsp;</p>
+    <h1 class="title">Eleven Years, Two Very Different Riders</h1>
+    <p class="dek">What eleven years of Garmin and Peloton data say about how riding changed, one commute at a time &mdash; charts and stats below are generated live from this project's own <code>data/</code> directory.</p>
+
+    <div class="stat-row">
+      <div class="stat-tile">
+        <div class="stat-value" id="stat-km">&mdash;</div>
+        <div class="stat-sub" id="stat-mi">&nbsp;</div>
+        <div class="stat-label">Distance ridden</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-value" id="stat-hours">&mdash;</div>
+        <div class="stat-sub" id="stat-days">&nbsp;</div>
+        <div class="stat-label">Time in the saddle</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-value" id="stat-elevation">&mdash;</div>
+        <div class="stat-sub" id="stat-elevation-sub">&nbsp;</div>
+        <div class="stat-label">Elevation climbed</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-value" id="stat-rides">&mdash;</div>
+        <div class="stat-sub" id="stat-rides-sub">&nbsp;</div>
+        <div class="stat-label">Rides logged</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-value" id="stat-calories">&mdash;</div>
+        <div class="stat-sub" id="stat-calories-sub">&nbsp;</div>
+        <div class="stat-label">Calories burned</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-value" id="stat-years">&mdash;</div>
+        <div class="stat-sub" id="stat-years-sub">&nbsp;</div>
+        <div class="stat-label">Span of data</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== SECTION 1: TWO ERAS ===================== -->
+  <section class="chapter" id="eras">
+    <p class="eyebrow">The Big Shift</p>
+    <h2 class="chapter-title serif">From century rides to the daily commute</h2>
+    <p class="prose">
+      2015 through 2019 was the era of the long ride: <strong>Fletcher Flyer</strong>, <strong>Bike&nbsp;MS</strong>,
+      <strong>Gran&nbsp;Fondo&nbsp;NY</strong>, <strong>Tour to Tanglewood</strong> &mdash; organized century and charity rides
+      regularly topping 100&nbsp;km, several past 160&nbsp;km. Riding averaged <strong>309 rides a year</strong> at
+      <strong>11.4&nbsp;km</strong> each. Two things happened at once in 2020. The data shows a complete stop from
+      <strong>April through June</strong> &mdash; zero rides for three months, the only gap like it in eleven years &mdash;
+      as commuting stopped being necessary at all. And separately, chronic low back pain set in: initially diagnosed as a
+      bulging disk pressing on the sciatic nerve, unresolved by physical therapy or steroid injections. Riding didn't stop;
+      it changed shape. Long training and charity rides gave way to short, strictly-commute riding, the only kind that didn't
+      aggravate it. The longest ride of the year falls from 95&nbsp;km (2019) to 19&nbsp;km (2020) and doesn't climb back
+      above 21&nbsp;km for six years. Every year since has averaged <strong>154 rides</strong> at <strong>7.9&nbsp;km</strong>
+      each &mdash; half the frequency, about a third shorter &mdash; not a decline so much as a six-year adaptation to pain
+      that, at the time, had no fix.
+      <span class="callout">A Garmin Edge&nbsp;810 (2015&ndash;2022) was later replaced by a newer Edge model &mdash; the 2020 break happens two years before that swap, so it isn't a device artifact.</span>
+    </p>
+    <div class="chart-grid">
+      <div class="chart-card amber">
+        <p class="chart-title">Rides per year</p>
+        <p class="chart-subtitle">Outdoor rides logged, live from <code style="font-size:0.7rem;">data/processed/*.json</code></p>
+        <div class="chart-wrap" id="chart-rides"></div>
+      </div>
+      <div class="chart-card amber">
+        <p class="chart-title">Longest ride of the year</p>
+        <p class="chart-subtitle">The century-ride era ends abruptly in 2020</p>
+        <div class="chart-wrap" id="chart-longest"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SECTION 2: COMMUTE ===================== -->
+  <section class="chapter" id="commute">
+    <p class="eyebrow">Daily Pattern</p>
+    <h2 class="chapter-title serif">A ride that runs on a work schedule</h2>
+    <p class="prose">
+      Every FIT timestamp in this export is recorded in UTC with no stored offset &mdash; correcting to US Eastern
+      (UTC&minus;5) turns a scattered-looking distribution into a clean two-hump commute pattern: a morning cluster
+      from <strong>5&ndash;8am</strong> and an afternoon cluster from <strong>3&ndash;6pm</strong>. Weekday rides
+      (Mon&ndash;Thu) average around 7&nbsp;km; weekend rides run roughly 7&times; longer &mdash; the last echo of the
+      long-ride habit, now confined to Saturdays and Sundays.
+    </p>
+    <div class="chart-grid single">
+      <div class="chart-card amber">
+        <p class="chart-title">Rides by hour of day (local time)</p>
+        <p class="chart-subtitle">Timezone-corrected from UTC &mdash; morning and afternoon commute clusters</p>
+        <div class="chart-wrap" id="chart-hour"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SECTION 3: PACE ===================== -->
+  <section class="chapter" id="pace">
+    <p class="eyebrow">Reading The Trend Carefully</p>
+    <h2 class="chapter-title serif">Slower pace, shorter rides &mdash; not necessarily less fit</h2>
+    <p class="prose">
+      Average cadence and speed (from real per-second telemetry, not session summaries) both fell steadily from the
+      2015&ndash;2017 era into the commuting years. It's tempting to read that as declining fitness, but it lines up
+      exactly with the shift in the section above: open-road century-pace training rides and short, pain-conscious
+      commuting have inherently different pace profiles &mdash; riding easier was, for years, part of how the back
+      pain was managed. A trend line across both eras mostly measures <em>which kind of riding was happening and
+      why</em>, not fitness on its own.
+    </p>
+    <div class="chart-grid">
+      <div class="chart-card amber">
+        <p class="chart-title">Average cadence by year</p>
+        <p class="chart-subtitle">From real per-second track data</p>
+        <div class="chart-wrap" id="chart-cadence"></div>
+      </div>
+      <div class="chart-card amber">
+        <p class="chart-title">Average speed by year</p>
+        <p class="chart-subtitle">km/h, from real per-second track data</p>
+        <div class="chart-wrap" id="chart-speed"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SECTION 4: PELOTON ===================== -->
+  <section class="chapter indoor" id="peloton">
+    <p class="eyebrow">A Different Kind of Ride</p>
+    <h2 class="chapter-title serif">Peloton, in bursts &mdash; not a steady habit</h2>
+    <p class="prose">
+      Peloton first shows up in <strong>2021</strong> &mdash; pandemic-era classes &mdash; then goes almost silent
+      through 2022&ndash;2025. It picks back up sharply in 2026, for a reason the data can pin down almost to the
+      day &mdash; see <a href="#recovery">Recovery</a>, next.
+      <span class="callout">Peloton sometimes splits a class into separate synced activities &mdash; a warm-up, the main set, and a cool-down as their own files &mdash; so the raw yearly ride count runs a bit higher than the number of real workout sessions.</span>
+    </p>
+    <div class="chart-grid single">
+      <div class="chart-card blue">
+        <p class="chart-title">Peloton rides per year</p>
+        <p class="chart-subtitle">2021 pandemic-era adoption, a long gap, then a sharp 2026 return</p>
+        <div class="chart-wrap" id="chart-peloton"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SECTION: RECOVERY ===================== -->
+  <section class="chapter recovery" id="recovery">
+    <p class="eyebrow">The Turning Point</p>
+    <h2 class="chapter-title serif">A new diagnosis, and the first pain-free days in years</h2>
+    <p class="prose">
+      In May 2026, a new spine specialist changed the diagnosis: not a bulging disk, but <strong>spinal stenosis</strong>
+      inflaming a specific nerve root. A targeted steroid injection on <strong>June&nbsp;4, 2026</strong> brought
+      complete relief &mdash; for the first time in years. The data shows almost exactly when the new routine started.
+      Peloton rides resume <strong>June&nbsp;28</strong>, 24 days after the injection, and not with the easy sessions
+      from 2021 &mdash; HIIT and Tabata classes from the first week back. A trainer-led strength program appears in the
+      export for the first time ever, starting <strong>July&nbsp;5</strong>: Week&nbsp;1&nbsp;Day&nbsp;1, Week&nbsp;1&nbsp;Day&nbsp;2,
+      Week&nbsp;3&nbsp;Day&nbsp;1&hellip; the only strength training logged in eleven years of data. Outdoor commuting
+      continues unchanged alongside both &mdash; still short, still frequent &mdash; now one part of three instead of
+      the only option.
+      <span class="callout">Strength sessions come from Strava's own activity log, not this project's FIT/TCX pipeline &mdash; Hevy-logged workouts like these were never exported with an underlying GPS/sensor file, so there's no heart rate or per-set detail to chart here yet.</span>
+    </p>
+    <div class="chart-grid single">
+      <div class="chart-card green">
+        <p class="chart-title">Return to activity, week by week</p>
+        <p class="chart-subtitle">Peloton cardio and strength sessions since the injection</p>
+        <div class="chart-legend">
+          <span class="key"><span class="swatch blue"></span>Peloton cardio</span>
+          <span class="key"><span class="swatch green"></span>Strength training</span>
+        </div>
+        <div class="chart-wrap" id="chart-recovery"></div>
+      </div>
+    </div>
+
+    <div class="chart-card timeline-card">
+      <p class="chart-title">Full timeline</p>
+      <p class="chart-subtitle">Fetched live from <code>data/context/life_events.json</code> &mdash; add an entry there and reload this page to see it here</p>
+      <ol class="timeline-list" id="timeline-list"></ol>
+    </div>
+  </section>
+
+  <!-- ===================== SECTION 5: RECENT ===================== -->
+  <section class="chapter" id="recent">
+    <p class="eyebrow">Where Things Stand Now</p>
+    <h2 class="chapter-title serif">Still commuting, unevenly</h2>
+    <p class="prose">
+      Over the last 24 months, outdoor rides have run well below the 2015&ndash;2019 peak, but as a steady, ongoing
+      habit rather than one that stopped.
+    </p>
+    <div class="chart-grid single">
+      <div class="chart-card amber">
+        <p class="chart-title">Rides per month, last 24 months</p>
+        <p class="chart-subtitle">Outdoor commute rides only</p>
+        <div class="chart-wrap" id="chart-monthly"></div>
+      </div>
+    </div>
+  </section>
+
+  <details class="data-table">
+    <summary>View full year-by-year data as a table</summary>
+    <div class="table-wrap">
+      <table class="yeardata" id="year-table">
+        <thead>
+          <tr><th>Year</th><th>Rides</th><th>Distance (km)</th><th>Longest ride (km)</th><th>Avg HR</th><th>Avg cadence</th><th>Avg speed (km/h)</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </details>
+
+  <footer class="methodology">
+    <p><strong>About this data.</strong> This is a local page, not a hosted one &mdash; open it via VS Code's Live Server (or any local HTTP server) from the repo root, and it reads project files directly. The timeline above is fetched fresh from <code>data/context/life_events.json</code> on every load. The charts and stat tiles come from <code>analysis/reports/data/dashboard_data.json</code>, a compact summary generated by <code>analysis/reports/build_dashboard_data.py</code> from <code>data/processed/*.json</code> and <code>data/processed_tracks/*.parquet</code> via DuckDB &mdash; re-run that script after processing a new batch of activities to refresh the charts. <span id="generated-at-note"></span></p>
+    <p>Hour-of-day and weekday figures assume US Eastern time (UTC&minus;5); the source data has no stored timezone offset, so this is an approximation that may drift a little around DST boundaries. Cadence/speed/HR trends reflect the mix of ride types in each period as much as fitness. GPX-sourced activities are intentionally excluded &mdash; no calorie, heart-rate, or power data of their own.</p>
+  </footer>
+
+</div>
+
+<script type="module">
+/* ---------------------------------------------------------------------
+   Embedded palette validator (dataviz skill) -- confirms both light and
+   dark palettes pass the lightness/chroma/CVD/contrast checks. Logs to
+   the console; does not affect rendering.
+--------------------------------------------------------------------- */
+const MACHADO = {
+  protan: [[0.152286,1.052583,-0.204868],[0.114503,0.786281,0.099216],[-0.003882,-0.048116,1.051998]],
+  deutan: [[0.367322,0.860646,-0.227968],[0.280085,0.672501,0.047413],[-0.011820,0.042940,0.968881]],
+};
+const BAND = { light: [0.43,0.77], dark: [0.48,0.67] };
+const CHROMA_FLOOR = 0.10, CVD_TARGET = 8.0, CVD_FLOOR = 6.0, NORMAL_FLOOR = 15.0, CONTRAST_MIN = 3.0;
+const hex2srgb = (h) => { h = h.trim().replace(/^#/, ""); return [0,2,4].map(i => parseInt(h.slice(i,i+2),16)/255); };
+const s2lin = (c) => c <= 0.04045 ? c/12.92 : ((c+0.055)/1.055) ** 2.4;
+const lin = (h) => hex2srgb(h).map(s2lin);
+const relLum = (h) => { const [r,g,b] = lin(h); return 0.2126*r+0.7152*g+0.0722*b; };
+const contrastFn = (a,b) => { const [hi,lo] = [relLum(a),relLum(b)].sort((x,y)=>y-x); return (hi+0.05)/(lo+0.05); };
+function oklabFromLin([r,g,b]) {
+  const l = Math.cbrt(0.4122214708*r+0.5363325363*g+0.0514459929*b);
+  const m = Math.cbrt(0.2119034982*r+0.6806995451*g+0.1073969566*b);
+  const s = Math.cbrt(0.0883024619*r+0.2817188376*g+0.6299787005*b);
+  return [0.2104542553*l+0.7936177850*m-0.0040720468*s, 1.9779984951*l-2.4285922050*m+0.4505937099*s, 0.0259040371*l+0.7827717662*m-0.8086757660*s];
+}
+const oklab = (h) => oklabFromLin(lin(h));
+const oklch = (h) => { const [L,a,b] = oklab(h); return [L, Math.hypot(a,b)]; };
+function simulate(h, kind) {
+  const [r,g,b] = lin(h), M = MACHADO[kind], clamp = (c) => Math.max(0,Math.min(1,c));
+  return [clamp(M[0][0]*r+M[0][1]*g+M[0][2]*b), clamp(M[1][0]*r+M[1][1]*g+M[1][2]*b), clamp(M[2][0]*r+M[2][1]*g+M[2][2]*b)];
+}
+function deltaE(h1,h2,kind) {
+  const a = oklabFromLin(kind ? simulate(h1,kind) : lin(h1));
+  const b = oklabFromLin(kind ? simulate(h2,kind) : lin(h2));
+  return 100*Math.hypot(a[0]-b[0], a[1]-b[1], a[2]-b[2]);
+}
+function validate(palette, { mode = "light", surface } = {}) {
+  const [lo,hi] = BAND[mode];
+  const report = [];
+  let ok = true;
+  const offband = palette.filter(c => { const L = oklch(c)[0]; return L < lo || L > hi; });
+  if (offband.length) ok = false;
+  report.push(["Lightness band", !offband.length, offband.length ? offband.join(",") : `all inside L ${lo}-${hi}`]);
+  const lowc = palette.filter(c => oklch(c)[1] < CHROMA_FLOOR);
+  if (lowc.length) ok = false;
+  report.push(["Chroma floor", !lowc.length, lowc.length ? lowc.join(",") : `all >= ${CHROMA_FLOOR}`]);
+  const n = palette.length;
+  const pairlist = Array.from({length:n-1}, (_,i) => [i,i+1]);
+  let worst = null;
+  for (const kind of ["protan","deutan"]) for (const [i,j] of pairlist) {
+    const d = deltaE(palette[i],palette[j],kind);
+    if (worst === null || d < worst[0]) worst = [d,kind];
+  }
+  const wd = worst ? worst[0] : 99;
+  const cvdState = wd >= CVD_TARGET ? "PASS" : wd >= CVD_FLOOR ? "WARN" : "FAIL";
+  if (cvdState === "FAIL") ok = false;
+  report.push(["CVD separation", cvdState, `worst dE ${wd.toFixed(1)} (${worst ? worst[1] : "n/a"})`]);
+  let nworst = null;
+  for (const [i,j] of pairlist) { const d = deltaE(palette[i],palette[j]); if (nworst === null || d < nworst) nworst = d; }
+  const norState = (nworst ?? 99) >= NORMAL_FLOOR ? "PASS" : "FAIL";
+  if (norState === "FAIL") ok = false;
+  report.push(["Normal-vision floor", norState, `worst dE ${(nworst ?? 99).toFixed(1)}`]);
+  const low = palette.filter(c => contrastFn(c,surface) < CONTRAST_MIN);
+  report.push(["Contrast vs surface", low.length ? "WARN" : "PASS", low.length ? `below ${CONTRAST_MIN}:1: ${low.join(",")}` : "all pass"]);
+  return { report, ok };
+}
+console.log("Fitness dashboard palette validation:");
+console.table(validate(["#B8720A","#0B5D91","#4E7A3A"], { mode: "light", surface: "#F0F1EE" }).report.map(([check,result,detail]) => ({check,result,detail})));
+console.table(validate(["#C4863A","#3391D6","#6FA050"], { mode: "dark", surface: "#1B1815" }).report.map(([check,result,detail]) => ({check,result,detail})));
+
+/* ---------------------------------------------------------------------
+   Minimal reusable bar/line chart renderer (inline SVG), following the
+   dataviz skill's mark specs: capped bars, rounded data-ends, hairline
+   gridlines, per-mark hover tooltip / crosshair, no dual axes.
+--------------------------------------------------------------------- */
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function niceMax(v) {
+  if (v <= 0) return 1;
+  const mag = Math.pow(10, Math.floor(Math.log10(v)));
+  const norm = v / mag;
+  const step = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10;
+  return step * mag;
+}
+function makeTooltip(container) {
+  const tt = document.createElement("div");
+  tt.className = "tooltip";
+  container.style.position = "relative";
+  container.appendChild(tt);
+  return tt;
+}
+function showTooltip(tt, container, x, y, label, value) {
+  const valueEl = document.createElement("span");
+  valueEl.className = "tt-value";
+  valueEl.textContent = value;
+  const labelEl = document.createElement("span");
+  labelEl.className = "tt-label";
+  labelEl.textContent = label;
+  tt.replaceChildren(valueEl, labelEl);
+  tt.style.opacity = "1";
+  const rect = container.getBoundingClientRect();
+  let left = x + 12, top = y - 14;
+  if (left + 140 > rect.width) left = x - 140;
+  tt.style.left = `${left}px`;
+  tt.style.top = `${Math.max(0, top)}px`;
+}
+function hideTooltip(tt) { tt.style.opacity = "0"; }
+
+function renderBar(containerId, categories, values, opts = {}) {
+  const container = document.getElementById(containerId);
+  const W = 520, H = 200, padL = 34, padR = 8, padT = 10, padB = 26;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const svg = el("svg", { class: "chart", viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.ariaLabel || "" });
+  const maxV = niceMax(Math.max(...values, 1));
+  const n = categories.length;
+  const slot = plotW / n;
+  const barW = Math.min(24, slot * 0.62);
+
+  [0, 0.5, 1].forEach((f) => {
+    const y = padT + plotH * (1 - f);
+    svg.appendChild(el("line", { class: "gridline", x1: padL, x2: W - padR, y1: y, y2: y }));
+    const t = el("text", { class: "axis-tick tabular", x: padL - 6, y: y + 3, "text-anchor": "end" });
+    t.textContent = Math.round(maxV * f).toLocaleString();
+    svg.appendChild(t);
+  });
+
+  const tt = makeTooltip(container);
+  values.forEach((v, i) => {
+    const cx = padL + slot * i + slot / 2;
+    const barH = maxV > 0 ? (v / maxV) * plotH : 0;
+    const y = padT + plotH - barH;
+    const rect = el("rect", {
+      class: `bar${opts.color === "blue" ? " blue" : ""}`,
+      x: cx - barW / 2, y: barH > 0 ? y : padT + plotH - 1, width: barW, height: Math.max(barH, 1), rx: 4, ry: 4,
+      tabindex: "0", role: "img", "aria-label": `${categories[i]}: ${opts.fmt ? opts.fmt(v) : v.toLocaleString()}`,
+    });
+    const show = () => { rect.classList.add("hovered"); showTooltip(tt, container, cx, y, String(categories[i]), opts.fmt ? opts.fmt(v) : v.toLocaleString()); };
+    const hide = () => { rect.classList.remove("hovered"); hideTooltip(tt); };
+    rect.addEventListener("pointerenter", show);
+    rect.addEventListener("pointermove", show);
+    rect.addEventListener("pointerleave", hide);
+    rect.addEventListener("focus", show);
+    rect.addEventListener("blur", hide);
+    svg.appendChild(rect);
+
+    if (opts.labelEvery && i % opts.labelEvery === 0) {
+      const t = el("text", { class: "axis-tick", x: cx, y: H - 8, "text-anchor": "middle" });
+      t.textContent = opts.tickFmt ? opts.tickFmt(categories[i]) : categories[i];
+      svg.appendChild(t);
+    }
+
+    if (opts.annotate && opts.annotate.index === i) {
+      const t = el("text", { class: "chart-annotation", x: cx, y: Math.max(y - 8, padT + 9), "text-anchor": "middle" });
+      t.textContent = opts.annotate.label;
+      svg.appendChild(t);
+    }
+  });
+  container.appendChild(svg);
+}
+
+function renderLine(containerId, categories, values, opts = {}) {
+  const container = document.getElementById(containerId);
+  const W = 520, H = 200, padL = 34, padR = 8, padT = 14, padB = 26;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const svg = el("svg", { class: "chart", viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.ariaLabel || "" });
+  const minV = opts.min0 === false ? Math.min(...values) * 0.95 : 0;
+  const maxV = niceMax(Math.max(...values));
+  const n = categories.length;
+  const stepX = plotW / (n - 1);
+  const xAt = (i) => padL + stepX * i;
+  const yAt = (v) => padT + plotH * (1 - (v - minV) / (maxV - minV));
+
+  [0, 0.5, 1].forEach((f) => {
+    const y = padT + plotH * (1 - f);
+    svg.appendChild(el("line", { class: "gridline", x1: padL, x2: W - padR, y1: y, y2: y }));
+    const t = el("text", { class: "axis-tick tabular", x: padL - 6, y: y + 3, "text-anchor": "end" });
+    t.textContent = Math.round(minV + (maxV - minV) * f).toLocaleString();
+    svg.appendChild(t);
+  });
+
+  const points = values.map((v, i) => `${xAt(i)},${yAt(v)}`).join(" ");
+  svg.appendChild(el("polyline", { class: `chart-line${opts.color === "blue" ? " blue" : ""}`, points }));
+
+  const tt = makeTooltip(container);
+  values.forEach((v, i) => {
+    const cx = xAt(i), cy = yAt(v);
+    const dot = el("circle", { class: `chart-dot${opts.color === "blue" ? " blue" : ""}`, cx, cy, r: 4 });
+    svg.appendChild(dot);
+    const hit = el("circle", {
+      class: "hit-col", cx, cy, r: 14, tabindex: "0", role: "img",
+      "aria-label": `${categories[i]}: ${opts.fmt ? opts.fmt(v) : v}`,
+    });
+    const show = () => showTooltip(tt, container, cx, cy, String(categories[i]), opts.fmt ? opts.fmt(v) : v);
+    const hide = () => hideTooltip(tt);
+    hit.addEventListener("pointerenter", show);
+    hit.addEventListener("pointermove", show);
+    hit.addEventListener("pointerleave", hide);
+    hit.addEventListener("focus", show);
+    hit.addEventListener("blur", hide);
+    svg.appendChild(hit);
+    if (opts.labelEvery && i % opts.labelEvery === 0) {
+      const t = el("text", { class: "axis-tick", x: cx, y: H - 8, "text-anchor": "middle" });
+      t.textContent = categories[i];
+      svg.appendChild(t);
+    }
+  });
+
+  if (opts.endLabel) {
+    const lastI = values.length - 1;
+    const t = el("text", { class: "axis-tick", x: xAt(lastI), y: yAt(values[lastI]) - 10, "text-anchor": "end", fill: "var(--ink)" });
+    t.setAttribute("font-weight", "600");
+    t.textContent = opts.fmt ? opts.fmt(values[lastI]) : values[lastI];
+    svg.appendChild(t);
+  }
+  container.appendChild(svg);
+}
+
+function renderGroupedBar(containerId, categories, seriesList, opts = {}) {
+  // seriesList: [{ name, values, color }, ...] -- two series, side-by-side bars per category.
+  const container = document.getElementById(containerId);
+  const W = 560, H = 210, padL = 34, padR = 8, padT = 10, padB = 26;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const svg = el("svg", { class: "chart", viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.ariaLabel || "" });
+  const maxV = niceMax(Math.max(...seriesList.flatMap(s => s.values), 1));
+  const n = categories.length;
+  const slot = plotW / n;
+  const groupW = Math.min(30, slot * 0.7);
+  const barW = groupW / seriesList.length - 2;
+
+  [0, 0.5, 1].forEach((f) => {
+    const y = padT + plotH * (1 - f);
+    svg.appendChild(el("line", { class: "gridline", x1: padL, x2: W - padR, y1: y, y2: y }));
+    const t = el("text", { class: "axis-tick tabular", x: padL - 6, y: y + 3, "text-anchor": "end" });
+    t.textContent = Math.round(maxV * f).toLocaleString();
+    svg.appendChild(t);
+  });
+
+  const tt = makeTooltip(container);
+  categories.forEach((cat, i) => {
+    const groupCx = padL + slot * i + slot / 2;
+    seriesList.forEach((s, si) => {
+      const v = s.values[i];
+      const barH = maxV > 0 ? (v / maxV) * plotH : 0;
+      const y = padT + plotH - barH;
+      const x = groupCx - groupW / 2 + si * (barW + 2);
+      const rect = el("rect", {
+        class: `bar ${s.color}`, x, y: barH > 0 ? y : padT + plotH - 1,
+        width: barW, height: Math.max(barH, 1), rx: 3, ry: 3,
+        tabindex: "0", role: "img", "aria-label": `${cat}, ${s.name}: ${v}`,
+      });
+      const show = () => { rect.classList.add("hovered"); showTooltip(tt, container, x + barW / 2, y, `${cat} — ${s.name}`, String(v)); };
+      const hide = () => { rect.classList.remove("hovered"); hideTooltip(tt); };
+      rect.addEventListener("pointerenter", show);
+      rect.addEventListener("pointermove", show);
+      rect.addEventListener("pointerleave", hide);
+      rect.addEventListener("focus", show);
+      rect.addEventListener("blur", hide);
+      svg.appendChild(rect);
+    });
+    if (opts.labelEvery && i % opts.labelEvery === 0) {
+      const t = el("text", { class: "axis-tick", x: groupCx, y: H - 8, "text-anchor": "middle" });
+      t.textContent = opts.tickFmt ? opts.tickFmt(cat) : cat;
+      svg.appendChild(t);
+    }
+  });
+
+  (opts.markers || []).forEach((m) => {
+    const i = categories.indexOf(m.category);
+    if (i === -1) return;
+    const x = padL + slot * i;
+    svg.appendChild(el("line", { class: "chart-marker-line", x1: x, x2: x, y1: padT, y2: padT + plotH }));
+    const t = el("text", { class: "chart-marker-label", x: x + 4, y: padT + 9 });
+    t.textContent = m.label;
+    svg.appendChild(t);
+  });
+
+  container.appendChild(svg);
+}
+
+/* ---------------------------------------------------------------------
+   Load — dashboard_data.json (pre-aggregated chart data, refreshed by
+   build_dashboard_data.py) and life_events.json (fetched live, always
+   current — no build step) — then render everything.
+--------------------------------------------------------------------- */
+function fmtDate(iso) {
+  return new Date(iso + "T00:00:00Z").toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
+}
+function fmtMonthYear(iso) {
+  return new Date(iso + "T00:00:00Z").toLocaleDateString("en-US", { year: "numeric", month: "short", timeZone: "UTC" });
+}
+
+async function main() {
+  let d, lifeEvents;
+  try {
+    const [dashRes, eventsRes] = await Promise.all([
+      fetch("data/dashboard_data.json"),
+      fetch("../../data/context/life_events.json"),
+    ]);
+    if (!dashRes.ok) throw new Error(`data/dashboard_data.json — HTTP ${dashRes.status}. Run: python analysis/reports/build_dashboard_data.py`);
+    if (!eventsRes.ok) throw new Error(`data/context/life_events.json — HTTP ${eventsRes.status}`);
+    d = await dashRes.json();
+    lifeEvents = await eventsRes.json();
+  } catch (err) {
+    document.getElementById("load-error-detail").textContent = err.message;
+    document.getElementById("load-error").style.display = "block";
+    console.error(err);
+    return;
+  }
+
+  document.getElementById("page").style.display = "";
+
+  /* ---- Header stat tiles ---- */
+  const s = d.stats;
+  document.getElementById("eyebrow-summary").textContent =
+    `${s.totalRides.toLocaleString()} rides · ${s.earliest.slice(0, 4)}–${s.latest.slice(0, 4)}`;
+  document.getElementById("stat-km").textContent = `${s.totalKm.toLocaleString()} km`;
+  document.getElementById("stat-mi").textContent = `${s.totalMi.toLocaleString()} mi`;
+  document.getElementById("stat-hours").textContent = `${s.totalHours.toLocaleString()} hrs`;
+  document.getElementById("stat-days").textContent = `${s.totalDays} days`;
+  document.getElementById("stat-elevation").textContent = `${s.totalElevationM.toLocaleString()} m`;
+  document.getElementById("stat-elevation-sub").textContent = `≈ ${Math.round(s.totalElevationM / 8849)}× Everest`;
+  document.getElementById("stat-rides").textContent = s.totalRides.toLocaleString();
+  document.getElementById("stat-rides-sub").textContent = `${s.outdoorRides.toLocaleString()} outdoor · ${s.pelotonRides.toLocaleString()} Peloton`;
+  document.getElementById("stat-calories").textContent = s.totalCalories.toLocaleString();
+  document.getElementById("stat-calories-sub").textContent = `avg ${Math.round(s.totalCalories / s.totalRides)} / ride`;
+  const years = (new Date(s.latest) - new Date(s.earliest)) / (365.25 * 24 * 3600 * 1000);
+  document.getElementById("stat-years").textContent = `${years.toFixed(0)} years`;
+  document.getElementById("stat-years-sub").textContent = `${fmtMonthYear(s.earliest)} – ${fmtMonthYear(s.latest)}`;
+  if (d.generated_at) {
+    document.getElementById("generated-at-note").textContent =
+      `Chart data last generated ${new Date(d.generated_at).toLocaleString()}.`;
+  }
+
+  /* ---- Charts ---- */
+  renderBar("chart-rides", d.byYear.map(r => r[0]), d.byYear.map(r => r[1]),
+    { ariaLabel: "Rides per year", labelEvery: 2 });
+
+  renderBar("chart-longest", d.byYear.map(r => r[0]), d.byYear.map(r => r[3]),
+    { ariaLabel: "Longest ride per year in kilometers", labelEvery: 2, fmt: (v) => `${v} km`,
+      annotate: { index: d.byYear.findIndex(r => r[0] === 2020), label: "injury + WFH begin" } });
+
+  renderBar("chart-hour", d.hourOfDay.map(r => `${r[0]}:00`), d.hourOfDay.map(r => r[1]),
+    { ariaLabel: "Rides by local hour of day", labelEvery: 3, tickFmt: (h) => h.split(":")[0] });
+
+  renderLine("chart-cadence", d.cadenceSpeedByYear.map(r => r[0]), d.cadenceSpeedByYear.map(r => r[1]),
+    { ariaLabel: "Average cadence by year in rpm", labelEvery: 2, min0: false, fmt: (v) => `${v} rpm`, endLabel: true });
+
+  renderLine("chart-speed", d.cadenceSpeedByYear.map(r => r[0]), d.cadenceSpeedByYear.map(r => r[2]),
+    { ariaLabel: "Average speed by year in km/h", labelEvery: 2, min0: false, fmt: (v) => `${v} km/h`, endLabel: true });
+
+  renderBar("chart-peloton", d.pelotonByYear.map(r => r[0]), d.pelotonByYear.map(r => r[1]),
+    { ariaLabel: "Peloton rides per year", color: "blue", labelEvery: 1 });
+
+  renderGroupedBar("chart-recovery", d.recoveryWeeks, [
+    { name: "Peloton cardio", values: d.recoveryPeloton, color: "blue" },
+    { name: "Strength training", values: d.recoveryStrength, color: "green" },
+  ], {
+    ariaLabel: "Peloton and strength sessions per week since the injection", labelEvery: 1,
+    markers: [{ category: "06-01", label: "injection, Jun 4" }],
+  });
+
+  renderBar("chart-monthly", d.monthlyLast24.map(r => r[0].slice(2)), d.monthlyLast24.map(r => r[1]),
+    { ariaLabel: "Outdoor rides per month, last 24 months", labelEvery: 3 });
+
+  /* ---- Timeline, fetched live from data/context/life_events.json ---- */
+  function formatEventDate(ev) {
+    const approx = ev.date_precision === "approximate";
+    const opts = { year: "numeric", month: "short", day: approx ? undefined : "numeric" };
+    const start = new Date(ev.date + "T00:00:00Z").toLocaleDateString("en-US", { ...opts, timeZone: "UTC" });
+    const prefix = approx ? "~" : "";
+    if (ev.date_end) {
+      const end = new Date(ev.date_end + "T00:00:00Z").toLocaleDateString("en-US", { ...opts, timeZone: "UTC" });
+      return `${prefix}${start} – ${end}`;
+    }
+    return `${prefix}${start}${ev.ongoing ? " – ongoing" : ""}`;
+  }
+  const sortedEvents = [...lifeEvents].sort((a, b) => a.date.localeCompare(b.date));
+  const timelineList = document.getElementById("timeline-list");
+  sortedEvents.forEach((ev) => {
+    const li = document.createElement("li");
+    const dateEl = document.createElement("div");
+    dateEl.className = "timeline-date";
+    dateEl.textContent = formatEventDate(ev);
+    const titleEl = document.createElement("div");
+    titleEl.className = "timeline-title";
+    titleEl.textContent = ev.title;
+    const descEl = document.createElement("p");
+    descEl.className = "timeline-desc";
+    descEl.textContent = ev.description;
+    li.append(dateEl, titleEl, descEl);
+    timelineList.appendChild(li);
+  });
+
+  /* ---- Data table ---- */
+  const tbody = document.querySelector("#year-table tbody");
+  const cadenceByYearMap = Object.fromEntries(d.cadenceSpeedByYear.map(r => [r[0], r]));
+  d.byYear.forEach(([yr, n, km, longest, avgHr]) => {
+    const cs = cadenceByYearMap[yr] || [yr, null, null];
+    const tr = document.createElement("tr");
+    [yr, n.toLocaleString(), km.toLocaleString(), longest, avgHr, cs[1] ?? "—", cs[2] ?? "—"].forEach((val) => {
+      const td = document.createElement("td");
+      td.textContent = val;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+main();
+</script>
+</body>
+</html>

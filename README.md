@@ -38,7 +38,7 @@ Defines and stores the standardized schema that all sources get mapped into, reg
 ### `analysis/`
 Tools for exploring and interpreting the structured fitness data.
 
-- **`reports/`** — pre-defined analysis (trends, summaries, performance metrics)
+- **`reports/`** — pre-defined analysis (trends, summaries, performance metrics), including `dashboard.html`, a local page (open via VS Code's Live Server, not by double-clicking the file) that reads project data directly — see `analysis/reports/build_dashboard_data.py`
 - **`ai/`** — AI-assisted analysis and natural-language interaction with the dataset
 
 ## Data Sources
