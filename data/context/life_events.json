@@ -1,0 +1,58 @@
+[
+  {
+    "id": "covid-wfh-commute-gap",
+    "date": "2020-04-01",
+    "date_end": "2020-06-30",
+    "date_precision": "approximate",
+    "category": "life-event",
+    "title": "COVID-19 remote work removes the need to commute",
+    "description": "Working from home during the COVID-19 pandemic removed the need for regular bike commuting. Visible in the activity data as a complete gap in rides from April through June 2020 -- the only gap of its kind in the full 11-year history.",
+    "tags": ["covid", "commute", "wfh"],
+    "recorded_at": "2026-08-05T00:00:00Z"
+  },
+  {
+    "id": "low-back-pain-onset",
+    "date": "2020-01-01",
+    "date_end": "2026-06-04",
+    "date_precision": "approximate",
+    "category": "health",
+    "title": "Chronic low back pain develops, initially misdiagnosed",
+    "description": "Developed low back pain that prevented completing long hours on the bike. Shifted to a strictly-commuting riding regimen (short, low-intensity rides) specifically to minimize pain, replacing the long training and charity rides that had been the norm through 2019. Initially diagnosed as a bulging disk pressing on the sciatic nerve; physical therapy and steroid injections targeting that diagnosis did not provide relief. This is a separate, distinct cause from the COVID commuting gap (see covid-wfh-commute-gap), though both begin around the same time.",
+    "tags": ["back-pain", "sciatica", "bulging-disk", "misdiagnosis", "cycling"],
+    "recorded_at": "2026-08-05T00:00:00Z"
+  },
+  {
+    "id": "spine-rediagnosis-stenosis",
+    "date": "2026-05-01",
+    "date_precision": "approximate",
+    "category": "health",
+    "title": "Diagnosis revised to spinal stenosis",
+    "description": "Saw a new spine doctor who changed the diagnosis from a bulging disk/sciatic nerve compression to spinal stenosis causing inflammation of a specific nerve root.",
+    "tags": ["back-pain", "stenosis", "diagnosis"],
+    "related_event_ids": ["low-back-pain-onset"],
+    "recorded_at": "2026-08-05T00:00:00Z"
+  },
+  {
+    "id": "nerve-root-steroid-injection",
+    "date": "2026-06-04",
+    "date_precision": "exact",
+    "category": "health",
+    "title": "Targeted steroid injection resolves back pain",
+    "description": "Received a steroid injection targeting the specific nerve root identified in the May 2026 stenosis diagnosis. Resulted in complete relief from back pain for the first time in years. Confirmed in the activity data as a real inflection point: Peloton cardio resumed 24 days later (June 28) and a structured strength program began about a month later (July 5) -- both are the first of their kind in years/ever in this dataset.",
+    "tags": ["back-pain", "stenosis", "treatment", "recovery"],
+    "related_event_ids": ["spine-rediagnosis-stenosis", "low-back-pain-onset"],
+    "recorded_at": "2026-08-05T00:00:00Z"
+  },
+  {
+    "id": "new-training-era-begins",
+    "date": "2026-06-04",
+    "date_precision": "approximate",
+    "ongoing": true,
+    "category": "training",
+    "title": "New routine: commuting, strength training, and short intense Peloton cardio",
+    "description": "Following pain relief, began a new three-part training routine: continued bike commuting (unchanged in distance/frequency), added structured strength training (first appears in the Strava export July 2026, as a trainer-led 'Week N Day N' program -- the only strength training logged anywhere in 11 years of data), and short, intense Peloton cardio sessions (HIIT/Tabata classes resumed June 28, 2026) in place of the longer, lower-intensity rides from the pre-injury era.",
+    "tags": ["training", "strength", "peloton", "recovery", "commute"],
+    "related_event_ids": ["nerve-root-steroid-injection"],
+    "recorded_at": "2026-08-05T00:00:00Z"
+  }
+]

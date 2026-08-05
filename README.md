@@ -31,7 +31,9 @@ Defines and stores the standardized schema that all sources get mapped into, reg
 
 - **`schema/`** — standardized data models (activities, metrics, athlete info)
 - **`processed/`** — cleaned, structured data ready for analysis
+- **`processed_tracks/`** — per-point time series (GPS, heart rate, cadence, power) as Parquet, one file per activity
 - **`raw/`** — unmodified data pulled directly from source APIs (kept for auditability/reprocessing)
+- **`context/`** — human-provided context (injuries, life events, equipment/training changes) that explains patterns the device data alone can't — see `data/context/README.md`
 
 ### `analysis/`
 Tools for exploring and interpreting the structured fitness data.

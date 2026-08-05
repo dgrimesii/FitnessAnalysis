@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FitnessAnalysis Life Event",
+  "description": "Human-provided context (health, life events, equipment changes, training decisions, etc.) used to augment analysis of the activity data. Not derived from any device, platform, or export -- entered by the user to explain patterns the raw data can't explain on its own.",
+  "type": "object",
+  "required": ["id", "date", "category", "title", "description"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Stable kebab-case slug identifying this event, e.g. 'back-injury-onset'. Referenced by other events via related_event_ids, so avoid changing it once set."
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Start date (or the only date, for a point-in-time event), ISO 8601 (YYYY-MM-DD). If only a month or year is known, use the 1st of that month/January 1st and set date_precision to 'approximate'."
+    },
+    "date_precision": {
+      "type": "string",
+      "enum": ["exact", "approximate"],
+      "default": "exact",
+      "description": "Whether `date` (and `date_end`, if present) is known precisely or is an approximation/best guess."
+    },
+    "date_end": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "End date for a range/period event (e.g. a period of pain, a training block). Omit or null for a point-in-time event."
+    },
+    "ongoing": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if this event/state began at `date` and was still true as of when this record was last updated, with no known end date yet."
+    },
+    "category": {
+      "type": "string",
+      "enum": ["health", "life-event", "equipment", "training", "other"],
+      "description": "Broad category for filtering. Extend this enum as new kinds of context come up."
+    },
+    "title": {
+      "type": "string",
+      "description": "Short human-readable label, e.g. for a chart annotation or list view."
+    },
+    "description": {
+      "type": "string",
+      "description": "Fuller narrative context, in the user's own words where possible -- this is where detail belongs, not just the title."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Free-form tags for cross-referencing/filtering, e.g. ['back-pain', 'cycling', 'commute']."
+    },
+    "related_event_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "IDs of other events in life_events.json that this one is causally or narratively linked to (e.g. a treatment event linking back to the diagnosis it followed)."
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this entry was added to the file (provenance -- when it was recorded, not the event's own date)."
+    }
+  }
+}
