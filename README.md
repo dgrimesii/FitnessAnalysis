@@ -76,7 +76,6 @@ Worth reading before planning new work — some of these are real limitations, n
 - **The dashboard's bulk chart data is not live**, unlike `data/context/life_events.json` (which the page fetches fresh on every load). A browser has no way to glob a folder of thousands of files the way DuckDB's CLI can, so `build_dashboard_data.py` has to be re-run manually after new activities are processed. See [Keeping things current](#keeping-things-current).
 - **`data/raw/` is defined in the schema doc but not actually populated** — the pipeline currently reads directly from the mapped Google Drive export rather than staging raw copies locally first. Fine for a one-time bulk import; would need revisiting for a recurring/incremental sync.
 - **No live Strava API ingestion.** Everything currently in `data/processed/` came from a one-time bulk data export, not the Strava API. OAuth, token refresh, and incremental "just pull what's new" ingestion don't exist — `fit_parser.py` and `backfill_activity_names.py` only ever process a static export folder on disk.
-- **GitHub issue #1 is technically still open** even though the work described in it is complete (2,720 activities processed, all acceptance criteria met per the commit history) — housekeeping was missed, not a sign of unfinished work.
 
 ## Keeping things current
 
