@@ -25,6 +25,7 @@ import re
 from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
+from statistics import mean
 
 import duckdb
 
@@ -42,6 +43,29 @@ WINDOW_START = date(2026, 6, 1)
 # "trainer-session-logging-quirk" entry in data/context/life_events.json.
 TRAINER_LED_RE = re.compile(r"Trainer Session|Training Session", re.I)
 TRAINER_LED_ASSUMED_MINUTES = 60  # 50 min training + 2x5 min stretch
+
+# Peloton syncs one class as several separate activities (warm-up / main set /
+# cool-down); back-to-back splits of the same ride land 10-120s apart, while
+# unrelated activities are separated by hours -- so a gap-based cutoff cleanly
+# tells them apart (verified against actual data for this window).
+PELOTON_BUNDLE_GAP_S = 600
+
+# A ride ending this close before a strength session's start is that
+# session's warm-up rather than an unrelated same-day activity. Observed gaps
+# split cleanly: 3-11 minutes for an actual pre-session warm-up ride vs.
+# 88+ minutes when a ride and a strength session just happen to share a day.
+PRE_STRENGTH_GAP_S = 20 * 60
+
+WARMUP_NAME_RE = re.compile(r"warm.?up", re.I)
+COOLDOWN_NAME_RE = re.compile(r"cool.?down", re.I)
+
+# A main segment counts as high-intensity if either signal says so -- HR and
+# power capture different aspects of effort (e.g. climbing/resistance formats
+# like Rolling Hills push watts up without spiking HR the way sprint
+# intervals do). Thresholds are derived from this window's own HIIT/Tabata
+# vs. Low Impact clusters, which separate cleanly at these values.
+HIGH_INTENSITY_HR = 128
+HIGH_INTENSITY_WATTS = 150
 
 
 def week_start(d: date) -> date:
@@ -73,6 +97,7 @@ def load_strength_sessions(csv_path: Path) -> list[dict]:
                 "date": dt.date().isoformat(),
                 "name": name,
                 "minutes": TRAINER_LED_ASSUMED_MINUTES if trainer_led else logged_minutes,
+                "_start": dt,
             }
             if trainer_led:
                 session["logged_minutes"] = logged_minutes
@@ -80,6 +105,100 @@ def load_strength_sessions(csv_path: Path) -> list[dict]:
             sessions.append(session)
     sessions.sort(key=lambda s: s["date"])
     return sessions
+
+
+def bundle_peloton_rows(rows: list[dict]) -> list[list[dict]]:
+    """Group Peloton's separately-synced warm-up/main/cool-down splits of one
+    ride back into a single logical session, based on the gap between them."""
+    bundles: list[list[dict]] = []
+    prev_end = None
+    for r in rows:
+        if prev_end is not None and (r["start"] - prev_end).total_seconds() <= PELOTON_BUNDLE_GAP_S:
+            bundles[-1].append(r)
+        else:
+            bundles.append([r])
+        prev_end = r["start"] + timedelta(seconds=r["elapsed_s"])
+    return bundles
+
+
+def build_peloton_sessions(rows: list[dict], strength_sessions: list[dict]) -> tuple[list[dict], list[dict]]:
+    """Bundle raw Peloton activities into rides, classify each ride's main
+    segment by actual HR/power rather than its name, and tag rides that
+    immediately precede a strength session as that session's warm-up.
+
+    Returns (sessions, warmup_only) -- `warmup_only` holds orphan warm-up/
+    cool-down splits with no main ride bundled to them (Peloton still synced
+    them as their own activity), which are informative but not a "ride" in
+    their own right, so they're kept out of the main sessions list.
+    """
+    strength_starts = sorted(s["_start"] for s in strength_sessions)
+
+    def preceding_strength(bundle_end: datetime) -> datetime | None:
+        for dt in strength_starts:
+            gap = (dt - bundle_end).total_seconds()
+            if 0 <= gap <= PRE_STRENGTH_GAP_S:
+                return dt
+        return None
+
+    def mark_strength_warmup(dt: datetime, ride_name: str) -> None:
+        for s in strength_sessions:
+            if s["_start"] == dt:
+                s["warmup_ride"] = ride_name
+                return
+
+    sessions, warmup_only = [], []
+    for bundle in bundle_peloton_rows(rows):
+        main = max(bundle, key=lambda r: r["elapsed_s"])
+        bundle_end = max(r["start"] + timedelta(seconds=r["elapsed_s"]) for r in bundle)
+        pre_strength_dt = preceding_strength(bundle_end)
+        is_orphan_warmup = len(bundle) == 1 and (WARMUP_NAME_RE.search(main["name"]) or COOLDOWN_NAME_RE.search(main["name"]))
+
+        if is_orphan_warmup:
+            warmup_only.append({
+                "date": main["start"].date().isoformat(),
+                "name": main["name"],
+                "hr": round(main["hr"], 1) if main["hr"] is not None else None,
+                "minutes": round(main["elapsed_s"] / 60.0, 1),
+                "pre_strength_for": pre_strength_dt.date().isoformat() if pre_strength_dt else None,
+            })
+            if pre_strength_dt:
+                mark_strength_warmup(pre_strength_dt, main["name"])
+            continue
+
+        warmups = [r for r in bundle if r is not main and r["start"] < main["start"]]
+        cooldowns = [r for r in bundle if r is not main and r["start"] > main["start"]]
+        warmup_hrs = [r["hr"] for r in warmups if r["hr"] is not None]
+        cooldown_hrs = [r["hr"] for r in cooldowns if r["hr"] is not None]
+        warmup_hr = round(mean(warmup_hrs), 1) if warmup_hrs else None
+        cooldown_hr = round(mean(cooldown_hrs), 1) if cooldown_hrs else None
+
+        watts = (main["kj"] * 1000 / main["elapsed_s"]) if main["kj"] and main["elapsed_s"] else None
+        high_intensity = bool(
+            (main["hr"] is not None and main["hr"] >= HIGH_INTENSITY_HR)
+            or (watts is not None and watts >= HIGH_INTENSITY_WATTS)
+        )
+        bundle_kj = sum(r["kj"] for r in bundle if r["kj"]) or None
+
+        sessions.append({
+            "date": main["start"].date().isoformat(),
+            "name": main["name"],
+            "hr": round(main["hr"], 1) if main["hr"] is not None else None,
+            "max_hr": main["max_hr"],
+            "minutes": round(main["elapsed_s"] / 60.0, 1),
+            "total_minutes": round(sum(r["elapsed_s"] for r in bundle) / 60.0, 1),
+            "watts": round(watts, 1) if watts is not None else None,
+            "kj": round(bundle_kj, 1) if bundle_kj is not None else None,
+            "calories": main["calories"],
+            "high_intensity": high_intensity,
+            "warmup_hr": warmup_hr,
+            "cooldown_hr": cooldown_hr,
+            "hr_recovery": round(main["hr"] - cooldown_hr, 1) if (main["hr"] is not None and cooldown_hr is not None) else None,
+            "pre_strength_for": pre_strength_dt.date().isoformat() if pre_strength_dt else None,
+        })
+        if pre_strength_dt:
+            mark_strength_warmup(pre_strength_dt, main["name"])
+
+    return sessions, warmup_only
 
 
 def main() -> None:
@@ -141,17 +260,18 @@ def main() -> None:
             "strength_n": s["n"], "strength_min": round(s["min"], 1),
         })
 
-    main_sets = con.execute(f"""
-        SELECT start_time::DATE, name, average_heart_rate, elapsed_time_s, calories,
+    peloton_activity_rows = con.execute(f"""
+        SELECT start_time, name, average_heart_rate, max_heart_rate, elapsed_time_s, calories,
                try_cast(class_metrics.output_kj AS DOUBLE)
         FROM {activities}
-        WHERE original_source = 'peloton' AND start_time >= '{WINDOW_START.isoformat()}' AND elapsed_time_s >= 600
+        WHERE original_source = 'peloton' AND start_time >= '{WINDOW_START.isoformat()}'
         ORDER BY start_time
     """).fetchall()
-    peloton_sessions = [{
-        "date": r[0].isoformat(), "name": r[1].encode("ascii", "ignore").decode("ascii"),
-        "hr": r[2], "minutes": round(r[3]/60.0, 1), "calories": r[4], "kj": round(r[5], 1) if r[5] else None,
-    } for r in main_sets]
+    peloton_raw = [{
+        "start": r[0], "name": r[1].encode("ascii", "ignore").decode("ascii"),
+        "hr": r[2], "max_hr": r[3], "elapsed_s": r[4], "calories": r[5], "kj": r[6],
+    } for r in peloton_activity_rows]
+    peloton_sessions, peloton_warmup_only = build_peloton_sessions(peloton_raw, strength_sessions)
 
     monthly = con.execute(f"""
         SELECT strftime(start_time, '%Y-%m') AS ym, original_source, count(*) AS n
@@ -184,7 +304,8 @@ def main() -> None:
         "week_labels": week_labels,
         "weekly": weekly,
         "peloton_sessions": peloton_sessions,
-        "strength_sessions": strength_sessions,
+        "peloton_warmup_only": peloton_warmup_only,
+        "strength_sessions": [{k: v for k, v in s.items() if not k.startswith("_")} for s in strength_sessions],
         "monthly_2026": monthly_series,
         "headline": {
             "outdoor_n": outdoor_total[0], "outdoor_min": outdoor_total[1], "outdoor_km": outdoor_total[2],
