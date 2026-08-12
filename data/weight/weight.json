@@ -1,0 +1,407 @@
+[
+  {
+    "id": "1441854238335000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2015-09-10T03:03:58.335000Z",
+    "weight_kg": 95.25,
+    "weight_lb": 210.0,
+    "ingested_at": "2026-08-12T14:37:12.944306Z"
+  },
+  {
+    "id": "1491071273723000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2017-04-01T18:27:53.723000Z",
+    "weight_kg": 90.45,
+    "weight_lb": 199.4,
+    "ingested_at": "2026-08-12T14:37:12.944317Z"
+  },
+  {
+    "id": "1492280859378000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2017-04-15T18:27:39.378000Z",
+    "weight_kg": 88.27,
+    "weight_lb": 194.6,
+    "ingested_at": "2026-08-12T14:37:12.944322Z"
+  },
+  {
+    "id": "1535115665099000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2018-08-24T13:01:05.099000Z",
+    "weight_kg": 88.27,
+    "weight_lb": 194.6,
+    "ingested_at": "2026-08-12T14:37:12.944327Z"
+  },
+  {
+    "id": "1535115687980000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2018-08-24T13:01:27.980000Z",
+    "weight_kg": 95.25,
+    "weight_lb": 210.0,
+    "ingested_at": "2026-08-12T14:37:12.944331Z"
+  },
+  {
+    "id": "1547510400000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2019-01-15T00:00:00Z",
+    "weight_kg": 98.43,
+    "weight_lb": 217.0,
+    "ingested_at": "2026-08-12T14:37:12.944334Z"
+  },
+  {
+    "id": "1556391600000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2019-04-27T19:00:00Z",
+    "weight_kg": 91.63,
+    "weight_lb": 202.0,
+    "ingested_at": "2026-08-12T14:37:12.944337Z"
+  },
+  {
+    "id": "1596551669441000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2020-08-04T14:34:29.441000Z",
+    "weight_kg": 97.52,
+    "weight_lb": 215.0,
+    "ingested_at": "2026-08-12T14:37:12.944340Z"
+  },
+  {
+    "id": "1596724484197000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2020-08-06T14:34:44.197000Z",
+    "weight_kg": 97.07,
+    "weight_lb": 214.0,
+    "ingested_at": "2026-08-12T14:37:12.944343Z"
+  },
+  {
+    "id": "1711070836576000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2024-03-22T01:27:16.576000Z",
+    "weight_kg": 108.86,
+    "weight_lb": 240.0,
+    "ingested_at": "2026-08-12T14:37:12.944346Z"
+  },
+  {
+    "id": "1739804400000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-02-17T15:00:00Z",
+    "weight_kg": 110.22,
+    "weight_lb": 243.0,
+    "ingested_at": "2026-08-12T14:37:12.944349Z"
+  },
+  {
+    "id": "1740999600000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-03-03T11:00:00Z",
+    "weight_kg": 109.41,
+    "weight_lb": 241.2,
+    "ingested_at": "2026-08-12T14:37:12.944352Z"
+  },
+  {
+    "id": "1741518000000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-03-09T11:00:00Z",
+    "weight_kg": 106.32,
+    "weight_lb": 234.4,
+    "ingested_at": "2026-08-12T14:37:12.944355Z"
+  },
+  {
+    "id": "1742133060000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-03-16T13:51:00Z",
+    "weight_kg": 104.96,
+    "weight_lb": 231.4,
+    "ingested_at": "2026-08-12T14:37:12.944358Z"
+  },
+  {
+    "id": "1742732100000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-03-23T12:15:00Z",
+    "weight_kg": 105.51,
+    "weight_lb": 232.6,
+    "ingested_at": "2026-08-12T14:37:12.944361Z"
+  },
+  {
+    "id": "1743338100000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-03-30T12:35:00Z",
+    "weight_kg": 104.87,
+    "weight_lb": 231.2,
+    "ingested_at": "2026-08-12T14:37:12.944364Z"
+  },
+  {
+    "id": "1743716040000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-04-03T21:34:00Z",
+    "weight_kg": 104.14,
+    "weight_lb": 229.6,
+    "ingested_at": "2026-08-12T14:37:12.944367Z"
+  },
+  {
+    "id": "1743937140000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-04-06T10:59:00Z",
+    "weight_kg": 103.87,
+    "weight_lb": 229.0,
+    "ingested_at": "2026-08-12T14:37:12.944370Z"
+  },
+  {
+    "id": "1744501020000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-04-12T23:37:00Z",
+    "weight_kg": 102.15,
+    "weight_lb": 225.2,
+    "ingested_at": "2026-08-12T14:37:12.944373Z"
+  },
+  {
+    "id": "1745090520000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-04-19T19:22:00Z",
+    "weight_kg": 101.24,
+    "weight_lb": 223.2,
+    "ingested_at": "2026-08-12T14:37:12.944376Z"
+  },
+  {
+    "id": "1745756340000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-04-27T12:19:00Z",
+    "weight_kg": 102.42,
+    "weight_lb": 225.8,
+    "ingested_at": "2026-08-12T14:37:12.944379Z"
+  },
+  {
+    "id": "1745789460000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-04-27T21:31:00Z",
+    "weight_kg": 100.52,
+    "weight_lb": 221.6,
+    "ingested_at": "2026-08-12T14:37:12.944382Z"
+  },
+  {
+    "id": "1746366000000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-05-04T13:40:00Z",
+    "weight_kg": 101.24,
+    "weight_lb": 223.2,
+    "ingested_at": "2026-08-12T14:37:12.944384Z"
+  },
+  {
+    "id": "1746741420000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-05-08T21:57:00Z",
+    "weight_kg": 99.79,
+    "weight_lb": 220.0,
+    "ingested_at": "2026-08-12T14:37:12.944388Z"
+  },
+  {
+    "id": "1746891780000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-05-10T15:43:00Z",
+    "weight_kg": 99.25,
+    "weight_lb": 218.8,
+    "ingested_at": "2026-08-12T14:37:12.944391Z"
+  },
+  {
+    "id": "1748181660000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-05-25T14:01:00Z",
+    "weight_kg": 98.7,
+    "weight_lb": 217.6,
+    "ingested_at": "2026-08-12T14:37:12.944395Z"
+  },
+  {
+    "id": "1748695080000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-05-31T12:38:00Z",
+    "weight_kg": 98.25,
+    "weight_lb": 216.6,
+    "ingested_at": "2026-08-12T14:37:12.944398Z"
+  },
+  {
+    "id": "1749901860000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-06-14T11:51:00Z",
+    "weight_kg": 98.16,
+    "weight_lb": 216.4,
+    "ingested_at": "2026-08-12T14:37:12.944401Z"
+  },
+  {
+    "id": "1751113440000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-06-28T12:24:00Z",
+    "weight_kg": 97.89,
+    "weight_lb": 215.8,
+    "ingested_at": "2026-08-12T14:37:12.944404Z"
+  },
+  {
+    "id": "1751852340000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-07-07T01:39:00Z",
+    "weight_kg": 97.43,
+    "weight_lb": 214.8,
+    "ingested_at": "2026-08-12T14:37:12.944407Z"
+  },
+  {
+    "id": "1752322980000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-07-12T12:23:00Z",
+    "weight_kg": 96.62,
+    "weight_lb": 213.0,
+    "ingested_at": "2026-08-12T14:37:12.944410Z"
+  },
+  {
+    "id": "1752935640000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-07-19T14:34:00Z",
+    "weight_kg": 96.34,
+    "weight_lb": 212.4,
+    "ingested_at": "2026-08-12T14:37:12.944412Z"
+  },
+  {
+    "id": "1754152080000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-08-02T16:28:00Z",
+    "weight_kg": 96.25,
+    "weight_lb": 212.2,
+    "ingested_at": "2026-08-12T14:37:12.944415Z"
+  },
+  {
+    "id": "1754831460000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-08-10T13:11:00Z",
+    "weight_kg": 96.8,
+    "weight_lb": 213.4,
+    "ingested_at": "2026-08-12T14:37:12.944418Z"
+  },
+  {
+    "id": "1755434040000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-08-17T12:34:00Z",
+    "weight_kg": 97.52,
+    "weight_lb": 215.0,
+    "ingested_at": "2026-08-12T14:37:12.944421Z"
+  },
+  {
+    "id": "1756815360000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-09-02T12:16:00Z",
+    "weight_kg": 96.43,
+    "weight_lb": 212.6,
+    "ingested_at": "2026-08-12T14:37:12.944424Z"
+  },
+  {
+    "id": "1759400520000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-10-02T10:22:00Z",
+    "weight_kg": 96.07,
+    "weight_lb": 211.8,
+    "ingested_at": "2026-08-12T14:37:12.944426Z"
+  },
+  {
+    "id": "1763300340000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-11-16T13:39:00Z",
+    "weight_kg": 94.71,
+    "weight_lb": 208.8,
+    "ingested_at": "2026-08-12T14:37:12.944429Z"
+  },
+  {
+    "id": "1765073280000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-12-07T02:08:00Z",
+    "weight_kg": 93.71,
+    "weight_lb": 206.6,
+    "ingested_at": "2026-08-12T14:37:12.944432Z"
+  },
+  {
+    "id": "1765628940000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2025-12-13T12:29:00Z",
+    "weight_kg": 93.26,
+    "weight_lb": 205.6,
+    "ingested_at": "2026-08-12T14:37:12.944435Z"
+  },
+  {
+    "id": "1769857560000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2026-01-31T11:06:00Z",
+    "weight_kg": 94.17,
+    "weight_lb": 207.6,
+    "ingested_at": "2026-08-12T14:37:12.944438Z"
+  },
+  {
+    "id": "1772885580000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2026-03-07T12:13:00Z",
+    "weight_kg": 92.08,
+    "weight_lb": 203.0,
+    "ingested_at": "2026-08-12T14:37:12.944441Z"
+  },
+  {
+    "id": "1782735360000000000",
+    "source": "google_fit",
+    "original_source": "hevy",
+    "recorded_at": "2026-06-29T12:16:00Z",
+    "weight_kg": 93.26,
+    "weight_lb": 205.6,
+    "ingested_at": "2026-08-12T14:37:12.944445Z"
+  },
+  {
+    "id": "1782813720000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2026-06-30T10:02:00Z",
+    "weight_kg": 92.8,
+    "weight_lb": 204.6,
+    "ingested_at": "2026-08-12T14:37:12.944448Z"
+  },
+  {
+    "id": "1786541640000000000",
+    "source": "google_fit",
+    "original_source": "google_fit_manual_entry",
+    "recorded_at": "2026-08-12T13:34:00Z",
+    "weight_kg": 92.67,
+    "weight_lb": 204.3,
+    "ingested_at": "2026-08-12T14:37:12.944450Z"
+  }
+]

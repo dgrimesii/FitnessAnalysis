@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FitnessAnalysis Weight Reading",
+  "description": "Standardized schema for a single body-weight reading, normalized across source apps (manually logged in Google Fit, synced from Hevy) via a Google Takeout export. Not activity data -- see data/body_metrics/README.md.",
+  "type": "object",
+  "required": ["id", "source", "original_source", "recorded_at", "weight_kg"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this reading. Google Fit weight points have no id of their own, so this is derived from the reading's nanosecond timestamp."
+    },
+    "source": {
+      "type": "string",
+      "enum": ["google_fit"],
+      "description": "Platform the data was retrieved from (a Google Takeout export of Google Fit data)."
+    },
+    "original_source": {
+      "type": "string",
+      "enum": ["google_fit_manual_entry", "hevy"],
+      "description": "Where the reading actually originated before landing in Google Fit: typed directly into the Fit app, or synced in from Hevy."
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the reading was taken/logged, ISO 8601."
+    },
+    "weight_kg": {
+      "type": "number",
+      "description": "Weight in kilograms, as stored by Google Fit (its native unit)."
+    },
+    "weight_lb": {
+      "type": "number",
+      "description": "Weight in pounds, derived from weight_kg for convenience -- this project's narrative context (see data/context/life_events.json) is generally discussed in pounds."
+    },
+    "ingested_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when this record was parsed/ingested into the repository."
+    }
+  }
+}

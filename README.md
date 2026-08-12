@@ -24,6 +24,7 @@ FitnessAnalysis is organized around three core functions:
 | Human-provided context (injuries, life events) | Done — structured, schema-validated, queryable alongside activity data |
 | Local analysis dashboard | Done — reads project data directly, no hosting/publishing step |
 | Post-treatment training report | Done — descriptive analysis of the window since the Jun 4, 2026 back treatment; a separate page from the main dashboard, same local-only pattern |
+| Body-weight data (Google Fit) | Done — 45 readings (2015–2026), extracted from a Google Takeout export; schema-validated, one-off re-extraction, not a recurring sync |
 | Automated tests | 103 passing (`ingestion/strava/tests/`) |
 | Live Strava API ingestion (OAuth, incremental sync) | Not started — everything so far is from a one-time bulk export |
 
@@ -44,6 +45,8 @@ FitnessAnalysis/
   - `backfill_activity_names.py` — one-time backfill that populates `name` on already-processed activities from Strava's `activities.csv` (the FIT/TCX payloads themselves don't carry the activity title).
   - `tests/` — 103 tests covering both scripts (`test_fit_parser.py`, `test_backfill_activity_names.py`).
   - *(Future sources — e.g. live Garmin/Apple Health APIs — would follow the same pattern as separate submodules. Nothing here does live API/OAuth ingestion yet; see the table above.)*
+- **`google_fit/`** — one-off extraction from a Google Fit Takeout export.
+  - `extract_weight.py` — parses body-weight readings out of Google Fit's merged weight datastream into `data/weight/weight.json`. Not a recurring batch pipeline like `strava/` — re-run by hand against a fresh Takeout export if new readings need pulling in. See `data/weight/README.md` for the full how-to, including a real gotcha: Takeout's web export can silently drop most of the "All Data" folder, so check the source `.zip` directly if an expected file seems to be missing rather than assuming the data was never there.
 
 ### `data/`
 
@@ -52,10 +55,12 @@ Defines and stores the standardized schema that all sources get mapped into, reg
 - **`schema/`**
   - `activity.schema.json` — the standardized per-activity record (JSON Schema draft-07). One object per activity: identity/timing fields at the top level, then one of `endurance_metrics` / `strength_metrics` / `class_metrics` populated depending on activity type (cardio/GPS, strength, or instructor-led class).
   - `life_event.schema.json` — schema for entries in `context/life_events.json` (see below).
+  - `weight.schema.json` — schema for entries in `weight/weight.json` (see below).
 - **`processed/`** — 2,720 standardized JSON activity records, one file per activity, named by activity ID. This is the primary analysis-ready dataset.
 - **`processed_tracks/`** — per-point time series (timestamp, lat/lon, altitude, heart rate, cadence, speed, power) as Parquet, one file per activity, joinable back to `processed/` on activity ID. This is what makes anything below session-summary granularity possible (e.g. "average cadence excluding stopped time").
 - **`raw/`** — intended location for unmodified source data pulled directly from an API (kept for auditability/reprocessing). Not populated yet — the current pipeline reads directly from the bulk export on the mapped Google Drive location rather than staging a local raw copy first.
 - **`context/`** — human-provided context (injuries, life events, equipment/training changes) that explains patterns the device data alone can't. See `data/context/README.md` for the schema and how to add entries; see [Known gaps](#known-gaps--deliberately-out-of-scope) for what this currently does and doesn't cover.
+- **`weight/`** — 45 body-weight readings (2015–2026), extracted from a Google Fit Takeout export via `ingestion/google_fit/extract_weight.py`. The one biometric outside the Strava activity data — see `data/weight/README.md` for the schema and how to re-extract from a fresh export.
 - **`logs/`** / **`summaries/`** — per-batch output from `fit_parser.py` runs: `logs/batch_<id>.log` has per-failure detail, `summaries/batch_<id>.md` has processed/succeeded/failed/skipped counts for that run. One pair per batch run, kept for traceability of how the full dataset was built up.
 
 ### `analysis/`
@@ -79,6 +84,7 @@ Worth reading before planning new work — some of these are real limitations, n
 - **The dashboard's bulk chart data is not live**, unlike `data/context/life_events.json` (which the page fetches fresh on every load). A browser has no way to glob a folder of thousands of files the way DuckDB's CLI can, so `build_dashboard_data.py` has to be re-run manually after new activities are processed. See [Keeping things current](#keeping-things-current).
 - **`data/raw/` is defined in the schema doc but not actually populated** — the pipeline currently reads directly from the mapped Google Drive export rather than staging raw copies locally first. Fine for a one-time bulk import; would need revisiting for a recurring/incremental sync.
 - **No live Strava API ingestion.** Everything currently in `data/processed/` came from a one-time bulk data export, not the Strava API. OAuth, token refresh, and incremental "just pull what's new" ingestion don't exist — `fit_parser.py` and `backfill_activity_names.py` only ever process a static export folder on disk.
+- **Weight readings are sparse and irregular**, not a daily log — 45 readings across 11 years, with multi-year gaps in the early years and roughly weekly readings only during the active 2025 GLP-1 weight-loss period. Fine for spot-checking a trend, not for anything that assumes a data point per day.
 
 ## Keeping things current
 
@@ -89,6 +95,11 @@ Two different update paths, depending on what changed:
   ```
   python analysis/reports/build_dashboard_data.py
   python analysis/reports/build_report_data.py
+  ```
+- **New weight readings logged:** take a fresh Google Takeout export of Fit data, then re-run extraction (see `data/weight/README.md`):
+  ```
+  python ingestion/google_fit/extract_weight.py --input-file "<path to the export's merge_weight.json>"
+  python data/weight/validate_weight.py
   ```
 
 ## Running the ingestion pipeline
@@ -133,3 +144,4 @@ pytest
 |--------|--------|
 | Strava (bulk export) | Ingested — 2,720 activities (2,628 Garmin, 92 Peloton) |
 | Strava (live API) | Not started |
+| Google Fit (Takeout export, weight only) | Ingested — 45 readings, 2015–2026 |
