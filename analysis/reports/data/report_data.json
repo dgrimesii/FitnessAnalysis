@@ -1,0 +1,438 @@
+{
+  "generated_at": "2026-08-12T14:00:35.035062+00:00",
+  "window_start": "2026-06-01",
+  "data_through": "2026-08-03",
+  "week_keys": [
+    "2026-06-01",
+    "2026-06-08",
+    "2026-06-15",
+    "2026-06-22",
+    "2026-06-29",
+    "2026-07-06",
+    "2026-07-13",
+    "2026-07-20",
+    "2026-07-27",
+    "2026-08-03"
+  ],
+  "week_labels": [
+    "Jun 1",
+    "Jun 8",
+    "Jun 15",
+    "Jun 22",
+    "Jun 29",
+    "Jul 6",
+    "Jul 13",
+    "Jul 20",
+    "Jul 27",
+    "Aug 3"
+  ],
+  "weekly": [
+    {
+      "week": "2026-06-01",
+      "outdoor_n": 4,
+      "outdoor_min": 101.3,
+      "outdoor_km": 29.5,
+      "outdoor_hr": 115.5,
+      "outdoor_cadence": 60.8,
+      "outdoor_speed": 17.5,
+      "peloton_n": 0,
+      "peloton_min": 0,
+      "peloton_hr": null,
+      "peloton_kj": 0,
+      "strength_n": 0,
+      "strength_min": 0.0
+    },
+    {
+      "week": "2026-06-08",
+      "outdoor_n": 6,
+      "outdoor_min": 148.0,
+      "outdoor_km": 44.5,
+      "outdoor_hr": 118.7,
+      "outdoor_cadence": 61.5,
+      "outdoor_speed": 18.1,
+      "peloton_n": 0,
+      "peloton_min": 0,
+      "peloton_hr": null,
+      "peloton_kj": 0,
+      "strength_n": 0,
+      "strength_min": 0.0
+    },
+    {
+      "week": "2026-06-15",
+      "outdoor_n": 6,
+      "outdoor_min": 145.6,
+      "outdoor_km": 44.5,
+      "outdoor_hr": 115.3,
+      "outdoor_cadence": 62.0,
+      "outdoor_speed": 18.4,
+      "peloton_n": 0,
+      "peloton_min": 0,
+      "peloton_hr": null,
+      "peloton_kj": 0,
+      "strength_n": 0,
+      "strength_min": 0.0
+    },
+    {
+      "week": "2026-06-22",
+      "outdoor_n": 0,
+      "outdoor_min": 0,
+      "outdoor_km": 0,
+      "outdoor_hr": null,
+      "outdoor_cadence": null,
+      "outdoor_speed": null,
+      "peloton_n": 3,
+      "peloton_min": 30.0,
+      "peloton_hr": 122.0,
+      "peloton_kj": 261.8,
+      "strength_n": 0,
+      "strength_min": 0.0
+    },
+    {
+      "week": "2026-06-29",
+      "outdoor_n": 4,
+      "outdoor_min": 97.9,
+      "outdoor_km": 29.5,
+      "outdoor_hr": 123.0,
+      "outdoor_cadence": 63.3,
+      "outdoor_speed": 18.2,
+      "peloton_n": 4,
+      "peloton_min": 50.0,
+      "peloton_hr": 114.3,
+      "peloton_kj": 407.2,
+      "strength_n": 1,
+      "strength_min": 45.0
+    },
+    {
+      "week": "2026-07-06",
+      "outdoor_n": 2,
+      "outdoor_min": 51.4,
+      "outdoor_km": 14.9,
+      "outdoor_hr": 83.5,
+      "outdoor_cadence": 62.5,
+      "outdoor_speed": 17.4,
+      "peloton_n": 7,
+      "peloton_min": 70.0,
+      "peloton_hr": 116.9,
+      "peloton_kj": 570.6,
+      "strength_n": 2,
+      "strength_min": 69.2
+    },
+    {
+      "week": "2026-07-13",
+      "outdoor_n": 0,
+      "outdoor_min": 0,
+      "outdoor_km": 0,
+      "outdoor_hr": null,
+      "outdoor_cadence": null,
+      "outdoor_speed": null,
+      "peloton_n": 5,
+      "peloton_min": 70.0,
+      "peloton_hr": 114.5,
+      "peloton_kj": 530.5,
+      "strength_n": 3,
+      "strength_min": 120.4
+    },
+    {
+      "week": "2026-07-20",
+      "outdoor_n": 0,
+      "outdoor_min": 0,
+      "outdoor_km": 0,
+      "outdoor_hr": null,
+      "outdoor_cadence": null,
+      "outdoor_speed": null,
+      "peloton_n": 9,
+      "peloton_min": 110.0,
+      "peloton_hr": 113.2,
+      "peloton_kj": 931.5,
+      "strength_n": 3,
+      "strength_min": 118.0
+    },
+    {
+      "week": "2026-07-27",
+      "outdoor_n": 6,
+      "outdoor_min": 146.6,
+      "outdoor_km": 44.5,
+      "outdoor_hr": 116.2,
+      "outdoor_cadence": 61.8,
+      "outdoor_speed": 18.3,
+      "peloton_n": 7,
+      "peloton_min": 90.0,
+      "peloton_hr": 117.0,
+      "peloton_kj": 776.8,
+      "strength_n": 3,
+      "strength_min": 120.5
+    },
+    {
+      "week": "2026-08-03",
+      "outdoor_n": 1,
+      "outdoor_min": 24.2,
+      "outdoor_km": 7.1,
+      "outdoor_hr": 114.0,
+      "outdoor_cadence": 61.0,
+      "outdoor_speed": 17.6,
+      "peloton_n": 0,
+      "peloton_min": 0,
+      "peloton_hr": null,
+      "peloton_kj": 0,
+      "strength_n": 0,
+      "strength_min": 0.0
+    }
+  ],
+  "peloton_sessions": [
+    {
+      "date": "2026-06-28",
+      "name": "20 min HIIT Ride with Jess King",
+      "hr": 141,
+      "minutes": 20.0,
+      "calories": 314,
+      "kj": 203.2
+    },
+    {
+      "date": "2026-07-03",
+      "name": "20 min HIIT Ride with Denis Morton",
+      "hr": 131,
+      "minutes": 20.0,
+      "calories": 284,
+      "kj": 198.5
+    },
+    {
+      "date": "2026-07-05",
+      "name": "20 min Low Impact Ride with Emma Lovewell",
+      "hr": 117,
+      "minutes": 20.0,
+      "calories": 223,
+      "kj": 157.5
+    },
+    {
+      "date": "2026-07-07",
+      "name": "10 min Warm Up Ride with Denis Morton",
+      "hr": 118,
+      "minutes": 10.0,
+      "calories": 113,
+      "kj": 92.5
+    },
+    {
+      "date": "2026-07-08",
+      "name": "20 min HIIT Ride with Alex Toussaint",
+      "hr": 135,
+      "minutes": 20.0,
+      "calories": 279,
+      "kj": 170.2
+    },
+    {
+      "date": "2026-07-10",
+      "name": "20 min HIIT Ride with Emma Lovewell",
+      "hr": 138,
+      "minutes": 20.0,
+      "calories": 289,
+      "kj": 206.2
+    },
+    {
+      "date": "2026-07-15",
+      "name": "20 min Low Impact Ride with Denis Morton",
+      "hr": null,
+      "minutes": 20.0,
+      "calories": 157,
+      "kj": 120.9
+    },
+    {
+      "date": "2026-07-17",
+      "name": "20 min Tabata Ride with Tunde Oyeneyin",
+      "hr": 135,
+      "minutes": 20.0,
+      "calories": 280,
+      "kj": 209.8
+    },
+    {
+      "date": "2026-07-19",
+      "name": "20 min Low Impact Ride with Jenn Sherman",
+      "hr": 109,
+      "minutes": 20.0,
+      "calories": 197,
+      "kj": 142.7
+    },
+    {
+      "date": "2026-07-21",
+      "name": "15 min Low Impact Ride with Jenn Sherman",
+      "hr": 113,
+      "minutes": 15.0,
+      "calories": 159,
+      "kj": 117.6
+    },
+    {
+      "date": "2026-07-21",
+      "name": "15 min Low Impact Ride with Camila Ramn",
+      "hr": 125,
+      "minutes": 15.0,
+      "calories": 186,
+      "kj": 130.1
+    },
+    {
+      "date": "2026-07-22",
+      "name": "20 min Rolling Hills Ride with Olivia Amato",
+      "hr": 128,
+      "minutes": 20.0,
+      "calories": 258,
+      "kj": 200.8
+    },
+    {
+      "date": "2026-07-24",
+      "name": "20 min HIIT & Hills Ride with Emma Lovewell",
+      "hr": 136,
+      "minutes": 20.0,
+      "calories": 283,
+      "kj": 214.1
+    },
+    {
+      "date": "2026-07-26",
+      "name": "20 min Low Impact Ride with Emma Lovewell",
+      "hr": 105,
+      "minutes": 20.0,
+      "calories": 187,
+      "kj": 150.2
+    },
+    {
+      "date": "2026-07-28",
+      "name": "20 min HIIT Ride with Emma Lovewell",
+      "hr": 138,
+      "minutes": 20.0,
+      "calories": 288,
+      "kj": 216.6
+    },
+    {
+      "date": "2026-07-31",
+      "name": "30 min HIIT & Hills Ride with Emma Lovewell",
+      "hr": 134,
+      "minutes": 30.0,
+      "calories": 417,
+      "kj": 315.2
+    },
+    {
+      "date": "2026-08-02",
+      "name": "20 min Low Impact Ride with Sam Yo",
+      "hr": 106,
+      "minutes": 20.0,
+      "calories": 189,
+      "kj": 125.9
+    }
+  ],
+  "strength_sessions": [
+    {
+      "date": "2026-07-05",
+      "name": "Afternoon workout",
+      "minutes": 45.0
+    },
+    {
+      "date": "2026-07-07",
+      "name": "Week 1 Day 1",
+      "minutes": 36.0
+    },
+    {
+      "date": "2026-07-10",
+      "name": "Week 1 Day 2",
+      "minutes": 33.2
+    },
+    {
+      "date": "2026-07-15",
+      "name": "Week 3 Day 1",
+      "minutes": 25.7
+    },
+    {
+      "date": "2026-07-17",
+      "name": "Week 3 Day 2",
+      "minutes": 34.7
+    },
+    {
+      "date": "2026-07-19",
+      "name": "Training Session 3",
+      "minutes": 60,
+      "logged_minutes": 9.5,
+      "trainer_led": true
+    },
+    {
+      "date": "2026-07-21",
+      "name": "Week 4 Day 1",
+      "minutes": 30.0
+    },
+    {
+      "date": "2026-07-24",
+      "name": "Week 4 Day 2",
+      "minutes": 28.0
+    },
+    {
+      "date": "2026-07-26",
+      "name": "Trainer Session 4",
+      "minutes": 60,
+      "logged_minutes": 7.5,
+      "trainer_led": true
+    },
+    {
+      "date": "2026-07-29",
+      "name": "Week 5 Day 1",
+      "minutes": 28.6
+    },
+    {
+      "date": "2026-07-31",
+      "name": "Week 5 Day 2",
+      "minutes": 31.9
+    },
+    {
+      "date": "2026-08-02",
+      "name": "Trainer Session 5",
+      "minutes": 60,
+      "logged_minutes": 10.7,
+      "trainer_led": true
+    }
+  ],
+  "monthly_2026": [
+    {
+      "month": "2026-01",
+      "outdoor": 10,
+      "peloton": 0
+    },
+    {
+      "month": "2026-02",
+      "outdoor": 12,
+      "peloton": 0
+    },
+    {
+      "month": "2026-03",
+      "outdoor": 12,
+      "peloton": 0
+    },
+    {
+      "month": "2026-04",
+      "outdoor": 10,
+      "peloton": 0
+    },
+    {
+      "month": "2026-05",
+      "outdoor": 12,
+      "peloton": 0
+    },
+    {
+      "month": "2026-06",
+      "outdoor": 20,
+      "peloton": 3
+    },
+    {
+      "month": "2026-07",
+      "outdoor": 8,
+      "peloton": 31
+    },
+    {
+      "month": "2026-08",
+      "outdoor": 1,
+      "peloton": 1
+    }
+  ],
+  "headline": {
+    "outdoor_n": 29,
+    "outdoor_min": 715.0,
+    "outdoor_km": 214.0,
+    "peloton_n": 35,
+    "peloton_min": 420.0,
+    "strength_n": 12,
+    "strength_min": 473.1
+  }
+}

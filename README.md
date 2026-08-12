@@ -23,6 +23,7 @@ FitnessAnalysis is organized around three core functions:
 | Activity names | Done — backfilled for existing data, captured going forward |
 | Human-provided context (injuries, life events) | Done — structured, schema-validated, queryable alongside activity data |
 | Local analysis dashboard | Done — reads project data directly, no hosting/publishing step |
+| Post-treatment training report | Done — descriptive analysis of the window since the Jun 4, 2026 back treatment; a separate page from the main dashboard, same local-only pattern |
 | Automated tests | 103 passing (`ingestion/strava/tests/`) |
 | Live Strava API ingestion (OAuth, incremental sync) | Not started — everything so far is from a one-time bulk export |
 
@@ -62,7 +63,9 @@ Defines and stores the standardized schema that all sources get mapped into, reg
 - **`reports/`** — pre-defined analysis.
   - `dashboard.html` — a local HTML page ("Eleven Years, Two Very Different Riders") covering ride volume/distance over time, cadence/speed trends, commute time-of-day patterns, Peloton adoption, and a recovery timeline tied to `data/context/life_events.json`. Runs entirely off local project files — open it via VS Code's **Live Server** extension (or any local HTTP server); it will not work opened directly as a `file://` path, since browsers block `fetch()` from that origin. Not hosted or published anywhere.
   - `build_dashboard_data.py` — regenerates `analysis/reports/data/dashboard_data.json`, the pre-aggregated chart data behind the dashboard, by re-running a set of DuckDB queries against `data/processed/*.json` + `data/processed_tracks/*.parquet` (plus Strava's `activities.csv` directly, for strength-training sessions — see [Known gaps](#known-gaps--deliberately-out-of-scope)). Run this after processing a new batch of activities so the dashboard reflects the latest data — see [Keeping things current](#keeping-things-current).
-  - `requirements.txt` — `duckdb`, used only by the build script above.
+  - `post_treatment_report.html` — a second, separate local page ("Back on the Bike, and Off It Too") covering the window since the Jun 4, 2026 back treatment specifically: weekly training volume across outdoor/Peloton/strength, Peloton effort trend, commute stability, and the strength program log — descriptive only, explicitly stopping short of comparative or prescriptive analysis. Same run-it-locally-via-Live-Server pattern as `dashboard.html`; fetches `data/context/life_events.json` live for its timeline.
+  - `build_report_data.py` — regenerates `analysis/reports/data/report_data.json`, the data behind the report above, the same way `build_dashboard_data.py` does for the main dashboard. Also applies the trainer-led strength session duration correction documented in `data/context/life_events.json` (`trainer-session-logging-quirk`) — those sessions get logged into Hevy after the fact, so their raw duration reflects logging time, not the ~60-minute appointment.
+  - `requirements.txt` — `duckdb`, used only by the build scripts above.
 - **`ai/`** — placeholder for AI-assisted, natural-language analysis over the dataset. Not started.
 
 ## Known gaps / deliberately out of scope
@@ -81,10 +84,11 @@ Worth reading before planning new work — some of these are real limitations, n
 
 Two different update paths, depending on what changed:
 
-- **New human context (an injury update, equipment change, etc.):** edit `data/context/life_events.json` directly (see `data/context/README.md`), run `python data/context/validate_life_events.py`, then just reload the dashboard — no other step needed.
-- **New activities processed:** re-run the ingestion batch (see below), then regenerate the dashboard's chart data:
+- **New human context (an injury update, equipment change, etc.):** edit `data/context/life_events.json` directly (see `data/context/README.md`), run `python data/context/validate_life_events.py`, then just reload the dashboard/report pages — both fetch it live, no other step needed.
+- **New activities processed:** re-run the ingestion batch (see below), then regenerate both pages' chart data:
   ```
   python analysis/reports/build_dashboard_data.py
+  python analysis/reports/build_report_data.py
   ```
 
 ## Running the ingestion pipeline
