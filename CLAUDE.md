@@ -18,6 +18,20 @@ checkboxes tracking what's actually done. Always check #27 before starting an
 issue — an issue's stated dependency being *open* in #27 means don't assume its
 output exists yet, even if this repo's current state suggests otherwise.
 
+## Tooling status
+
+**No browser automation is configured** (no Playwright, no headless-browser MCP,
+nothing that can load a page and report back what's rendered). This means:
+
+- Anything checkable from code — file contents, HTTP responses, computed values,
+  DOM structure produced by a template, test assertions — is Claude Code's job,
+  fully autonomous.
+- Anything that requires actually seeing a rendered page — layout, spacing, dark
+  mode not looking broken, whether an interaction "feels" right — is **always**
+  an owner task, not a conditional one. Don't defer this judgment to "unless
+  automation is available" in individual issues; there isn't any right now. If
+  that changes, this section will be updated and issues can be revisited.
+
 ## Before starting an issue
 
 1. The issue's **Acceptance Criteria** section is the definition of done. Build to
@@ -29,11 +43,11 @@ output exists yet, even if this repo's current state suggests otherwise.
    what an unfinished upstream issue will produce.
 3. Some Acceptance Criteria items are marked **(requires you)**. These need the
    repo owner directly — an OAuth consent flow, registering an API application, a
-   second physical device to test network isolation, a final look at rendered
-   pixels in an actual browser. Do not attempt to simulate, mock past, or claim
-   completion of these. Implement everything else in the issue, then stop and
-   report back the specific, concrete list of what you need the owner to do —
-   exact steps, not "some manual setup is needed."
+   second physical device to test network isolation, a look at rendered pixels in
+   an actual browser (see Tooling status above). Do not attempt to simulate, mock
+   past, or claim completion of these. Implement everything else in the issue,
+   then stop and report back the specific, concrete list of what you need the
+   owner to do — exact steps, not "some manual setup is needed."
 4. When every unmarked AC item is done and verified, check the issue's box on
    **#27**. Leave the GitHub issue itself open for the owner to close, unless
    they've told you otherwise for the session.
