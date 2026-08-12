@@ -216,6 +216,7 @@
   .s-chip.trainer { background: var(--milestone-soft); color: var(--milestone); }
   .strength-row .s-dur .s-est { color: var(--ink-muted); cursor: help; }
   .strength-row .s-name { color: var(--ink-1); }
+  .s-note-inline { margin-left: 6px; font-size: 12px; cursor: help; opacity: 0.8; }
   .strength-row .s-dur { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
   .strength-row.gap { background: repeating-linear-gradient(135deg, transparent, transparent 6px, var(--gridline) 6px, var(--gridline) 7px); }
   .strength-row.gap .s-name { color: var(--ink-muted); font-style: italic; }
@@ -355,12 +356,12 @@
   </section>
 
   <section id="peloton-intensity">
-    <h2>Peloton: effort trend <span class="num">main-set sessions, ≥10 min</span></h2>
-    <p class="lede" id="peloton-lede">Filtered to just the actual class portion — the 5-minute warm-up and cool-down segments Peloton syncs as separate activities are excluded here (see caveats). Filled dots are high-intensity formats (HIIT, Tabata, HIIT &amp; Hills); open dots are Low Impact / Rolling Hills days.</p>
+    <h2>Peloton: effort trend <span class="num">main ride per session, warm-up/cool-down bundled in</span></h2>
+    <p class="lede" id="peloton-lede">Peloton syncs one class as separate warm-up / main / cool-down activities; those are bundled back into a single ride here (grouped by how close together they were recorded), and intensity is judged from the main ride's actual heart rate and power — not the class name — so a hard effort is never miscategorized just because its title doesn't say "HIIT." Filled dots are high-effort main rides (avg HR ≥ 128 or avg power ≥ 150 W); open dots are lower-effort days.</p>
     <div class="chart-card">
       <div class="legend">
-        <span class="legend-item dot"><span class="legend-swatch peloton"></span>High intensity</span>
-        <span class="legend-item dot"><span class="legend-swatch ring"></span>Low impact / rolling</span>
+        <span class="legend-item dot"><span class="legend-swatch peloton"></span>High effort</span>
+        <span class="legend-item dot"><span class="legend-swatch ring"></span>Lower effort</span>
       </div>
       <svg class="chart" id="chart-peloton" viewBox="0 0 900 260" preserveAspectRatio="xMinYMin meet"></svg>
     </div>
@@ -390,7 +391,7 @@
 
   <section id="strength-log">
     <h2>Strength: the first structured program in this dataset's history</h2>
-    <p class="lede">A self-directed "Week N Day N" program is the bulk of the sessions below. The "Trainer-led" entries are a different thing: live 1-hour appointments, logged into Hevy after the fact, so their raw duration is just how long the logging took, not the session — shown here as an estimated 60 min (50 min training + 2×5 min stretch) instead, marked with *. Each was preceded by a Peloton Low Impact ride as a warm-up before arriving. See <code>data/context/life_events.json</code> for the full note on this.</p>
+    <p class="lede">A self-directed "Week N Day N" program is the bulk of the sessions below. The "Trainer-led" entries are a different thing: live 1-hour appointments, logged into Hevy after the fact, so their raw duration is just how long the logging took, not the session — shown here as an estimated 60 min (50 min training + 2×5 min stretch) instead, marked with *. See <code>data/context/life_events.json</code> for the full note on this. Sessions marked <span class="s-note-inline">🚴</span> below were immediately preceded by a Peloton ride (ended within 20 min of the session start) that likely served as that day's warm-up — based on timing, this turns out to be a self-directed-program pattern, not a trainer-led one.</p>
     <div class="strength-log" id="strength-log"></div>
   </section>
 
@@ -400,7 +401,7 @@
     <div class="caveat-list">
       <div class="caveat"><span class="c-mark">01</span><div><strong>No body weight or composition data anywhere in this repo.</strong> The GLP-1/weight-loss context above is entirely user-reported, not queryable. If tracking weight against training load matters going forward, that's a new data source to add, structured the same way <code>data/context/life_events.json</code> is.</div></div>
       <div class="caveat"><span class="c-mark">02</span><div><strong>Ingestion lag:</strong> the data behind this page reflects activities processed as of the last <code>build_report_data.py</code> run — <span id="caveat-through"></span>. Anything more recent, including up to today, simply hasn't been pulled in yet; that's not evidence of a training pause.</div></div>
-      <div class="caveat"><span class="c-mark">03</span><div><strong>Peloton splits one class into multiple synced activities</strong> (warm-up / main set / cool-down). Raw activity counts overstate real workout sessions by roughly 3x; the intensity chart above corrects for this by filtering to ≥10-minute main sets, but the Peloton stat tile does not.</div></div>
+      <div class="caveat"><span class="c-mark">03</span><div><strong>Peloton splits one class into multiple synced activities</strong> (warm-up / main set / cool-down). Raw activity counts overstate real workout sessions by roughly 3x; the intensity chart above corrects for this by bundling activities recorded close together back into one ride, but the Peloton stat tile does not.</div></div>
       <div class="caveat"><span class="c-mark">04</span><div><strong>Strength sessions carry no set/rep/weight detail</strong> — Strava's export for trainer-synced strength activities has no underlying sensor file, so only date and duration exist. Session dates come from <code>activities.csv</code> directly, not the standard per-activity pipeline. Trainer-led sessions' 60-min duration is a manual estimate (user-reported), not logged data — see <code>data/context/life_events.json</code>.</div></div>
       <div class="caveat"><span class="c-mark">05</span><div><strong>Timestamps assume a fixed UTC-5 offset</strong> with no DST correction, since the source data carries no per-activity timezone.</div></div>
     </div>
@@ -671,7 +672,6 @@ async function main() {
     const minD = Math.min(...dates), maxD = Math.max(...dates);
     const hrs = sessions.filter(s => s.hr !== null).map(s => s.hr);
     const minHR = Math.min(...hrs) - 6, maxHR = Math.max(...hrs) + 6;
-    const highIntensity = n => /HIIT|Tabata/i.test(n);
 
     const x = t => padL + ((t - minD) / (maxD - minD || 1)) * plotW;
     const y = hr => padT + plotH - ((hr - minHR) / (maxHR - minHR)) * plotH;
@@ -697,14 +697,18 @@ async function main() {
     sessions.forEach(s => {
       if (s.hr === null) return;
       const px = x(new Date(s.date).getTime()), py = y(s.hr);
-      const hi = highIntensity(s.name);
       const dot = el('circle', {
         cx: px, cy: py, r: 5,
-        fill: hi ? 'var(--peloton)' : 'var(--surface-raised)',
+        fill: s.high_intensity ? 'var(--peloton)' : 'var(--surface-raised)',
         stroke: 'var(--peloton)', 'stroke-width': 2,
       });
+      const recoveryLine = s.hr_recovery !== null
+        ? `<br>Recovered ${s.hr_recovery} bpm by end of cool-down (${s.cooldown_hr} bpm)`
+        : '';
+      const warmupLine = s.warmup_hr !== null ? `<br>Warm-up HR ${s.warmup_hr} bpm` : '';
+      const strengthLine = s.pre_strength_for ? `<br>Warm-up for that day's strength session` : '';
       dot.addEventListener('mouseenter', (evt) => showTooltip(evt,
-        `<b>${s.name.replace(' Ride','')}</b><br>${s.date}<br>HR ${s.hr} bpm · ${s.kj ?? '–'} kJ · ${s.calories} cal`));
+        `<b>${s.name.replace(' Ride','')}</b><br>${s.date}<br>HR ${s.hr} bpm${s.watts ? ' · ' + s.watts + ' W' : ''} · ${s.kj ?? '–'} kJ · ${s.calories} cal${warmupLine}${recoveryLine}${strengthLine}`));
       dot.addEventListener('mousemove', moveTooltip);
       dot.addEventListener('mouseleave', hideTooltip);
       svg.appendChild(dot);
@@ -719,10 +723,10 @@ async function main() {
     });
     svg.appendChild(el('line', { x1: padL, x2: W - padR, y1: padT + plotH, y2: padT + plotH, class: 'baseline' }));
 
-    const warmupDates = sessions.filter(s => !highIntensity(s.name) && s.hr !== null).map(s => s.date);
-    if (warmupDates.length) {
+    const dropsForStrength = sessions.some(s => s.pre_strength_for);
+    if (dropsForStrength) {
       document.getElementById('peloton-lede').textContent =
-        `Filtered to just the actual class portion — the 5-minute warm-up and cool-down segments Peloton syncs as separate activities are excluded here (see caveats). Filled dots are high-intensity formats (HIIT, Tabata, HIIT & Hills); open dots are Low Impact / Rolling Hills days — some of which double as the pre-appointment warm-up ridden before a trainer-led strength session, not a standalone easy day (see the strength log below).`;
+        `Peloton syncs one class as separate warm-up / main / cool-down activities; those are bundled back into a single ride here (grouped by how close together they were recorded), and intensity is judged from the main ride's actual heart rate and power — not the class name — so a hard effort is never miscategorized just because its title doesn't say "HIIT." Filled dots are high-effort main rides (avg HR ≥ 128 or avg power ≥ 150 W); open dots are lower-effort days — some of which double as that day's warm-up before a strength session rather than a standalone easy ride (see the strength log below).`;
     }
   })();
 
@@ -773,9 +777,12 @@ async function main() {
       const durHtml = s.trainer_led
         ? `<span class="s-est" title="Logged after the fact in Hevy — ${s.logged_minutes} min is how long it took to log, not the session length. Estimated at 50 min training + 2×5 min stretch.">${s.minutes} min*</span>`
         : `${s.minutes ?? '–'} min`;
+      const warmupNote = s.warmup_ride
+        ? `<span class="s-note-inline" title="Preceded by ${s.warmup_ride}, ended within 20 min of this session's start">🚴</span>`
+        : '';
       r.innerHTML = `<span class="s-date">${s.date}</span>` +
         `<span class="s-chip ${chip}">${chipLabel}</span>` +
-        `<span class="s-name">${s.name}</span>` +
+        `<span class="s-name">${s.name}${warmupNote}</span>` +
         `<span class="s-dur">${durHtml}</span>`;
       return r;
     }

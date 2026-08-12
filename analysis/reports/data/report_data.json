@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-12T14:00:35.035062+00:00",
+  "generated_at": "2026-08-12T17:29:51.431371+00:00",
   "window_start": "2026-06-01",
   "data_through": "2026-08-03",
   "week_keys": [
@@ -183,164 +183,298 @@
       "date": "2026-06-28",
       "name": "20 min HIIT Ride with Jess King",
       "hr": 141,
+      "max_hr": 158,
       "minutes": 20.0,
+      "total_minutes": 30.0,
+      "watts": 169.5,
+      "kj": 261.8,
       "calories": 314,
-      "kj": 203.2
+      "high_intensity": true,
+      "warmup_hr": 107,
+      "cooldown_hr": 118,
+      "hr_recovery": 23,
+      "pre_strength_for": null
     },
     {
       "date": "2026-07-03",
       "name": "20 min HIIT Ride with Denis Morton",
       "hr": 131,
+      "max_hr": 154,
       "minutes": 20.0,
+      "total_minutes": 30.0,
+      "watts": 165.4,
+      "kj": 249.7,
       "calories": 284,
-      "kj": 198.5
+      "high_intensity": true,
+      "warmup_hr": 100,
+      "cooldown_hr": 109,
+      "hr_recovery": 22,
+      "pre_strength_for": null
     },
     {
       "date": "2026-07-05",
       "name": "20 min Low Impact Ride with Emma Lovewell",
       "hr": 117,
+      "max_hr": 147,
       "minutes": 20.0,
+      "total_minutes": 20.0,
+      "watts": 131.2,
+      "kj": 157.5,
       "calories": 223,
-      "kj": 157.5
-    },
-    {
-      "date": "2026-07-07",
-      "name": "10 min Warm Up Ride with Denis Morton",
-      "hr": 118,
-      "minutes": 10.0,
-      "calories": 113,
-      "kj": 92.5
+      "high_intensity": false,
+      "warmup_hr": null,
+      "cooldown_hr": null,
+      "hr_recovery": null,
+      "pre_strength_for": "2026-07-05"
     },
     {
       "date": "2026-07-08",
       "name": "20 min HIIT Ride with Alex Toussaint",
       "hr": 135,
+      "max_hr": 155,
       "minutes": 20.0,
+      "total_minutes": 30.0,
+      "watts": 141.9,
+      "kj": 233.8,
       "calories": 279,
-      "kj": 170.2
+      "high_intensity": true,
+      "warmup_hr": 103,
+      "cooldown_hr": 116,
+      "hr_recovery": 19,
+      "pre_strength_for": null
     },
     {
       "date": "2026-07-10",
       "name": "20 min HIIT Ride with Emma Lovewell",
       "hr": 138,
+      "max_hr": 154,
       "minutes": 20.0,
+      "total_minutes": 30.0,
+      "watts": 171.9,
+      "kj": 244.4,
       "calories": 289,
-      "kj": 206.2
+      "high_intensity": true,
+      "warmup_hr": 96,
+      "cooldown_hr": 112,
+      "hr_recovery": 26,
+      "pre_strength_for": "2026-07-10"
     },
     {
       "date": "2026-07-15",
       "name": "20 min Low Impact Ride with Denis Morton",
       "hr": null,
+      "max_hr": null,
       "minutes": 20.0,
+      "total_minutes": 20.0,
+      "watts": 100.9,
+      "kj": 120.9,
       "calories": 157,
-      "kj": 120.9
+      "high_intensity": false,
+      "warmup_hr": null,
+      "cooldown_hr": null,
+      "hr_recovery": null,
+      "pre_strength_for": "2026-07-15"
     },
     {
       "date": "2026-07-17",
       "name": "20 min Tabata Ride with Tunde Oyeneyin",
       "hr": 135,
+      "max_hr": 154,
       "minutes": 20.0,
+      "total_minutes": 30.0,
+      "watts": 174.8,
+      "kj": 266.8,
       "calories": 280,
-      "kj": 209.8
+      "high_intensity": true,
+      "warmup_hr": 101,
+      "cooldown_hr": 113,
+      "hr_recovery": 22,
+      "pre_strength_for": "2026-07-17"
     },
     {
       "date": "2026-07-19",
       "name": "20 min Low Impact Ride with Jenn Sherman",
       "hr": 109,
+      "max_hr": 138,
       "minutes": 20.0,
+      "total_minutes": 20.0,
+      "watts": 118.9,
+      "kj": 142.7,
       "calories": 197,
-      "kj": 142.7
+      "high_intensity": false,
+      "warmup_hr": null,
+      "cooldown_hr": null,
+      "hr_recovery": null,
+      "pre_strength_for": null
     },
     {
       "date": "2026-07-21",
       "name": "15 min Low Impact Ride with Jenn Sherman",
       "hr": 113,
+      "max_hr": 135,
       "minutes": 15.0,
+      "total_minutes": 20.0,
+      "watts": 130.8,
+      "kj": 147.5,
       "calories": 159,
-      "kj": 117.6
+      "high_intensity": false,
+      "warmup_hr": 96,
+      "cooldown_hr": null,
+      "hr_recovery": null,
+      "pre_strength_for": null
     },
     {
       "date": "2026-07-21",
       "name": "15 min Low Impact Ride with Camila Ramn",
       "hr": 125,
+      "max_hr": 143,
       "minutes": 15.0,
+      "total_minutes": 20.0,
+      "watts": 144.5,
+      "kj": 171.8,
       "calories": 186,
-      "kj": 130.1
+      "high_intensity": false,
+      "warmup_hr": 106,
+      "cooldown_hr": null,
+      "hr_recovery": null,
+      "pre_strength_for": "2026-07-21"
     },
     {
       "date": "2026-07-22",
       "name": "20 min Rolling Hills Ride with Olivia Amato",
       "hr": 128,
+      "max_hr": 153,
       "minutes": 20.0,
+      "total_minutes": 20.0,
+      "watts": 167.3,
+      "kj": 200.8,
       "calories": 258,
-      "kj": 200.8
+      "high_intensity": true,
+      "warmup_hr": null,
+      "cooldown_hr": null,
+      "hr_recovery": null,
+      "pre_strength_for": null
     },
     {
       "date": "2026-07-24",
       "name": "20 min HIIT & Hills Ride with Emma Lovewell",
       "hr": 136,
+      "max_hr": 156,
       "minutes": 20.0,
+      "total_minutes": 30.0,
+      "watts": 178.4,
+      "kj": 261.1,
       "calories": 283,
-      "kj": 214.1
+      "high_intensity": true,
+      "warmup_hr": 101,
+      "cooldown_hr": 109,
+      "hr_recovery": 27,
+      "pre_strength_for": "2026-07-24"
     },
     {
       "date": "2026-07-26",
       "name": "20 min Low Impact Ride with Emma Lovewell",
       "hr": 105,
+      "max_hr": 121,
       "minutes": 20.0,
+      "total_minutes": 20.0,
+      "watts": 125.2,
+      "kj": 150.2,
       "calories": 187,
-      "kj": 150.2
+      "high_intensity": false,
+      "warmup_hr": null,
+      "cooldown_hr": null,
+      "hr_recovery": null,
+      "pre_strength_for": null
     },
     {
       "date": "2026-07-28",
       "name": "20 min HIIT Ride with Emma Lovewell",
       "hr": 138,
+      "max_hr": 156,
       "minutes": 20.0,
+      "total_minutes": 30.0,
+      "watts": 180.5,
+      "kj": 273.4,
       "calories": 288,
-      "kj": 216.6
+      "high_intensity": true,
+      "warmup_hr": 108,
+      "cooldown_hr": 113,
+      "hr_recovery": 25,
+      "pre_strength_for": null
     },
     {
       "date": "2026-07-31",
       "name": "30 min HIIT & Hills Ride with Emma Lovewell",
       "hr": 134,
+      "max_hr": 154,
       "minutes": 30.0,
+      "total_minutes": 40.0,
+      "watts": 175.1,
+      "kj": 377.5,
       "calories": 417,
-      "kj": 315.2
+      "high_intensity": true,
+      "warmup_hr": 109,
+      "cooldown_hr": 111,
+      "hr_recovery": 23,
+      "pre_strength_for": "2026-07-31"
     },
     {
       "date": "2026-08-02",
       "name": "20 min Low Impact Ride with Sam Yo",
       "hr": 106,
+      "max_hr": 128,
       "minutes": 20.0,
+      "total_minutes": 20.0,
+      "watts": 104.9,
+      "kj": 125.9,
       "calories": 189,
-      "kj": 125.9
+      "high_intensity": false,
+      "warmup_hr": null,
+      "cooldown_hr": null,
+      "hr_recovery": null,
+      "pre_strength_for": null
+    }
+  ],
+  "peloton_warmup_only": [
+    {
+      "date": "2026-07-07",
+      "name": "10 min Warm Up Ride with Denis Morton",
+      "hr": 118,
+      "minutes": 10.0,
+      "pre_strength_for": "2026-07-07"
     }
   ],
   "strength_sessions": [
     {
       "date": "2026-07-05",
       "name": "Afternoon workout",
-      "minutes": 45.0
+      "minutes": 45.0,
+      "warmup_ride": "20 min Low Impact Ride with Emma Lovewell"
     },
     {
       "date": "2026-07-07",
       "name": "Week 1 Day 1",
-      "minutes": 36.0
+      "minutes": 36.0,
+      "warmup_ride": "10 min Warm Up Ride with Denis Morton"
     },
     {
       "date": "2026-07-10",
       "name": "Week 1 Day 2",
-      "minutes": 33.2
+      "minutes": 33.2,
+      "warmup_ride": "20 min HIIT Ride with Emma Lovewell"
     },
     {
       "date": "2026-07-15",
       "name": "Week 3 Day 1",
-      "minutes": 25.7
+      "minutes": 25.7,
+      "warmup_ride": "20 min Low Impact Ride with Denis Morton"
     },
     {
       "date": "2026-07-17",
       "name": "Week 3 Day 2",
-      "minutes": 34.7
+      "minutes": 34.7,
+      "warmup_ride": "20 min Tabata Ride with Tunde Oyeneyin"
     },
     {
       "date": "2026-07-19",
@@ -352,12 +486,14 @@
     {
       "date": "2026-07-21",
       "name": "Week 4 Day 1",
-      "minutes": 30.0
+      "minutes": 30.0,
+      "warmup_ride": "15 min Low Impact Ride with Camila Ramn"
     },
     {
       "date": "2026-07-24",
       "name": "Week 4 Day 2",
-      "minutes": 28.0
+      "minutes": 28.0,
+      "warmup_ride": "20 min HIIT & Hills Ride with Emma Lovewell"
     },
     {
       "date": "2026-07-26",
@@ -374,7 +510,8 @@
     {
       "date": "2026-07-31",
       "name": "Week 5 Day 2",
-      "minutes": 31.9
+      "minutes": 31.9,
+      "warmup_ride": "30 min HIIT & Hills Ride with Emma Lovewell"
     },
     {
       "date": "2026-08-02",
