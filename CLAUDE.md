@@ -52,6 +52,52 @@ nothing that can load a page and report back what's rendered). This means:
    **#27**. Leave the GitHub issue itself open for the owner to close, unless
    they've told you otherwise for the session.
 
+## Issue lifecycle
+
+Every issue in this repo — except #7 and #27, which are rationale and tracking,
+not work items — carries a `status:*` label showing where it sits. Update the
+label as part of the same action that changes the state; don't let it drift out
+of sync with what's actually happening.
+
+| Label | Meaning | Set by |
+|---|---|---|
+| `status:blocked-deps` | A dependency listed in #27 isn't done yet | Default while any blocker is open |
+| `status:ready` | Dependencies satisfied, not yet started | Whoever closes the last blocking dependency (see below) |
+| `status:in-progress` | Actively being worked this session | Claude Code, when starting |
+| `status:blocked-owner` | Hit a `(requires you)` item; stalled until the owner acts | Claude Code, the moment the blocker is hit |
+| `status:in-review` | All automatable Acceptance Criteria done; owner sign-off pending | Claude Code, when AC is complete |
+
+Closed with no label = done. Don't invent a "done" label for this.
+
+**Setting labels replaces the issue's full label list**, it does not add to
+whatever's already there. When changing status, re-apply anything else that
+should remain — in practice there usually won't be anything else, since
+`status:*` is the only label scheme currently in use.
+
+### What happens at each transition
+
+- **Starting work** (`status:ready` → `status:in-progress`): post a comment
+  stating the interpreted scope, the plan, and any `(requires you)` items
+  spotted up front — so the owner isn't surprised by one mid-task. Set the
+  label in the same action.
+- **Hitting a blocker** (→ `status:blocked-owner`): comment immediately with the
+  exact, concrete ask — not "some manual setup is needed." Set the label. Don't
+  keep working on unrelated parts of the same issue hoping the blocker resolves
+  itself; stop and surface it.
+- **Owner clears the blocker**: back to `status:in-progress`. No need to ask
+  permission to resume — the thing that was asked for existing is the signal.
+- **All automatable AC done** (→ `status:in-review`): a closing comment mapping
+  every AC checkbox to how it was verified — command run, test output, file
+  diffed against what. For any AC item marked `(requires you)`, name it
+  explicitly as still open rather than silently omitting it from the summary.
+- **A dependency closes**: whoever closes it — Claude Code or the owner — should
+  check #27 for any issue whose sole listed blocker was the one just closed, and
+  flip that issue's label from `status:blocked-deps` to `status:ready`. GitHub
+  doesn't do this automatically; it's a deliberate step, cheap enough to always
+  do when closing something.
+- **Owner reviews and closes**: check the corresponding box on #27. Closing the
+  issue itself is the owner's call, per "Before starting an issue" above.
+
 ## Non-negotiable invariants
 
 These recur across many issues. They were chosen deliberately — if one seems to
