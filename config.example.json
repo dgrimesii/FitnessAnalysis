@@ -1,7 +1,9 @@
 {
-  "_comment": "Documents the keys this repo's scripts expect at runtime. Real values go in .env (gitignored) as KEY=value lines, not in this file -- see CLAUDE.md's 'Secrets never enter git' invariant. This file itself is checked into git as documentation only.",
+  "_comment": "Documents the keys this repo's scripts expect at runtime. Real values go in .env or config.json (both gitignored), not in this file -- see CLAUDE.md's 'Secrets never enter git' invariant. This file itself is checked into git as documentation only.",
 
   "STRAVA_CLIENT_ID": "From https://www.strava.com/settings/api, used by ingestion/strava/exchange_oauth_code.py",
   "STRAVA_CLIENT_SECRET": "From https://www.strava.com/settings/api, used by ingestion/strava/exchange_oauth_code.py",
-  "STRAVA_ACCESS_TOKEN": "Short-lived OAuth access token, used by ingestion/strava/verify_activity_id_alignment.py (issue #16)"
+  "STRAVA_ACCESS_TOKEN": "Short-lived OAuth access token, used by ingestion/strava/verify_activity_id_alignment.py (issue #16)",
+
+  "birth_date": "ISO 8601 date (YYYY-MM-DD). Not a secret, but personal data -- goes in config.json (gitignored, local-only), never committed. Reserved for age-at-activity-date calculations (e.g. heart rate zone thresholds) -- captured ahead of that work, not yet consumed by any code."
 }
