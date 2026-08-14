@@ -143,6 +143,47 @@ around it.
   `config.example.json`, and read the real value from `.env` / `config.json` at
   runtime.
 
+## Medical data handling
+
+Anything under `data/medical/` deals with actual health records (lab/bloodwork
+reports). It follows stricter rules than the rest of this repo, and they don't
+bend for convenience:
+
+- **`data/medical/` is gitignored in full.** No committed subfolder, no
+  exception for a "safe" summary file, unlike the archive/incoming split used
+  for other sources (#22). Given the sensitivity, one unambiguous rule beats a
+  nuanced one that depends on remembering which subfolder was safe.
+- **Drop zone**: source PDFs land in `data/medical/_inbox/`, placed there
+  manually by the owner. Nothing automated fetches these — there's no source
+  to sync from, only files the owner has chosen to hand over.
+- **Structural extraction only, never narrative.** Any script reading these
+  PDFs extracts discrete lab-result rows — a test name, a numeric value, a
+  unit, optionally a reference range — and nothing else. Physician notes,
+  impressions, diagnosis codes, and any other free text are out of scope by
+  construction: if a script is holding onto or printing paragraph text from
+  one of these documents, it's doing the wrong thing regardless of what it's
+  for. This is a structural rule (row shape), not a fixed vocabulary of
+  approved test names — capture whatever discrete biometric facts exist.
+- **Capture is broad; the semantic layer decides value, later.** Don't
+  pre-filter to a hand-picked list of "important" tests during extraction.
+  What's captured and what becomes a tracked metric are different decisions
+  made at different times — an extracted fact that never becomes a named
+  metric in `metrics.json` (#18) isn't wasted, it's just sitting there if a
+  future question needs it.
+- **Confirm against source before anything is trusted.** Any script proposing
+  extracted values shows them next to the raw text they came from, so the
+  owner can check against the actual PDF — not just a plausibility check on
+  the final number. A misparse that's still in-range won't get caught by
+  range-checking alone.
+- **Discard-after-confirm.** Source PDFs are deleted once their extracted
+  values have been reviewed and confirmed. Confirmation has to happen while
+  the source is still present to check against — review, then delete, never
+  the other way around.
+- **Never paste real values into chat or commit messages.** A file staying
+  off GitHub doesn't help if the same content ends up in a hosted
+  conversation transcript instead. When reporting findings back to the
+  owner, summarize by test name and count, not by value.
+
 ## Code conventions (established by the existing ingestion code — follow them for new code)
 
 - **No top-level package.** Each module directory (`ingestion/strava/`,
@@ -185,6 +226,7 @@ verify, so the reasoning is visible even without an assertion behind it.
 |---|---|---|
 | `data/processed/`, `data/processed_tracks/` | Per-activity JSON + Parquet | Canonical |
 | `data/measurements/` | Sparse biometric readings (was `data/weight/`) | Canonical |
+| `data/medical/` | Lab/bloodwork data, inbox and any future capture | Canonical — gitignored in full, see "Medical data handling" |
 | `data/context/life_events.json` | Hand-authored timeline | Canonical — fetched live by dashboards, never materialized |
 | `data/raw/<source>/archive/` | Staged source payloads that passed validation | Canonical, retained for reprocessing |
 | `data/raw/<source>/incoming/`, `quarantine/` | In-flight / rejected payloads | Transient — gitignored |
