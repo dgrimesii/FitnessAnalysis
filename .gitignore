@@ -7,6 +7,10 @@ data/raw/*.fit
 *.env
 config.json
 
+# Medical / health data -- never commit, local-only by design (see CLAUDE.md's
+# "Medical data handling" section). Whole tree ignored, no committed subfolder.
+data/medical/
+
 # Throwaway diagnostic output (personal activity data, not a pipeline artifact)
 ingestion/strava/_id_verification/
 
