@@ -5,6 +5,10 @@ data/raw/*.fit
 # Secrets
 .env
 *.env
+config.json
+
+# Throwaway diagnostic output (personal activity data, not a pipeline artifact)
+ingestion/strava/_id_verification/
 
 # Python
 __pycache__/

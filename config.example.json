@@ -1,0 +1,7 @@
+{
+  "_comment": "Documents the keys this repo's scripts expect at runtime. Real values go in .env (gitignored) as KEY=value lines, not in this file -- see CLAUDE.md's 'Secrets never enter git' invariant. This file itself is checked into git as documentation only.",
+
+  "STRAVA_CLIENT_ID": "From https://www.strava.com/settings/api, used by ingestion/strava/exchange_oauth_code.py",
+  "STRAVA_CLIENT_SECRET": "From https://www.strava.com/settings/api, used by ingestion/strava/exchange_oauth_code.py",
+  "STRAVA_ACCESS_TOKEN": "Short-lived OAuth access token, used by ingestion/strava/verify_activity_id_alignment.py (issue #16)"
+}
