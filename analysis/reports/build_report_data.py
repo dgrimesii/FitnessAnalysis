@@ -121,48 +121,55 @@ def bundle_peloton_rows(rows: list[dict]) -> list[list[dict]]:
     return bundles
 
 
+def match_rides_to_strength(peloton_entries: list[dict], strength_sessions: list[dict]) -> None:
+    """Tag each strength session with the Peloton ride that served as its
+    warm-up (walk-to-trainer's-house routine: ride at home, then walk over),
+    and tag that ride with which session it warmed up for.
+
+    Self-directed "Week N Day N" sessions are logged live in Hevy, so their
+    timestamp is trustworthy -- a tight end-to-start gap reliably identifies
+    the warm-up ride. Trainer-led sessions are logged well after the fact
+    (walk home, shower, eat, *then* log from a photo of the trainer's paper
+    notes), so their logged start time can trail the real session by hours
+    and a gap check is meaningless -- same calendar date, picking the last
+    ride before the logged time, is the reliable signal there instead.
+    """
+    for s in strength_sessions:
+        same_day = [e for e in peloton_entries if e["end"].date() == s["_start"].date() and e["end"] <= s["_start"]]
+        if not same_day:
+            continue
+        match = max(same_day, key=lambda e: e["end"])
+        if not s.get("trainer_led") and (s["_start"] - match["end"]).total_seconds() > PRE_STRENGTH_GAP_S:
+            continue
+        s["warmup_ride"] = match["name"]
+        match["record"]["pre_strength_for"] = s["date"]
+
+
 def build_peloton_sessions(rows: list[dict], strength_sessions: list[dict]) -> tuple[list[dict], list[dict]]:
-    """Bundle raw Peloton activities into rides, classify each ride's main
-    segment by actual HR/power rather than its name, and tag rides that
-    immediately precede a strength session as that session's warm-up.
+    """Bundle raw Peloton activities into rides and classify each ride's main
+    segment by actual HR/power rather than its name.
 
     Returns (sessions, warmup_only) -- `warmup_only` holds orphan warm-up/
     cool-down splits with no main ride bundled to them (Peloton still synced
     them as their own activity), which are informative but not a "ride" in
     their own right, so they're kept out of the main sessions list.
     """
-    strength_starts = sorted(s["_start"] for s in strength_sessions)
-
-    def preceding_strength(bundle_end: datetime) -> datetime | None:
-        for dt in strength_starts:
-            gap = (dt - bundle_end).total_seconds()
-            if 0 <= gap <= PRE_STRENGTH_GAP_S:
-                return dt
-        return None
-
-    def mark_strength_warmup(dt: datetime, ride_name: str) -> None:
-        for s in strength_sessions:
-            if s["_start"] == dt:
-                s["warmup_ride"] = ride_name
-                return
-
-    sessions, warmup_only = [], []
+    sessions, warmup_only, peloton_entries = [], [], []
     for bundle in bundle_peloton_rows(rows):
         main = max(bundle, key=lambda r: r["elapsed_s"])
         bundle_end = max(r["start"] + timedelta(seconds=r["elapsed_s"]) for r in bundle)
-        pre_strength_dt = preceding_strength(bundle_end)
         is_orphan_warmup = len(bundle) == 1 and (WARMUP_NAME_RE.search(main["name"]) or COOLDOWN_NAME_RE.search(main["name"]))
 
         if is_orphan_warmup:
-            warmup_only.append({
+            record = {
                 "date": main["start"].date().isoformat(),
                 "name": main["name"],
                 "hr": round(main["hr"], 1) if main["hr"] is not None else None,
                 "minutes": round(main["elapsed_s"] / 60.0, 1),
-                "pre_strength_for": pre_strength_dt.date().isoformat() if pre_strength_dt else None,
-            })
-            if pre_strength_dt:
-                mark_strength_warmup(pre_strength_dt, main["name"])
+                "pre_strength_for": None,
+            }
+            warmup_only.append(record)
+            peloton_entries.append({"end": bundle_end, "name": main["name"], "record": record})
             continue
 
         warmups = [r for r in bundle if r is not main and r["start"] < main["start"]]
@@ -179,7 +186,7 @@ def build_peloton_sessions(rows: list[dict], strength_sessions: list[dict]) -> t
         )
         bundle_kj = sum(r["kj"] for r in bundle if r["kj"]) or None
 
-        sessions.append({
+        record = {
             "date": main["start"].date().isoformat(),
             "name": main["name"],
             "hr": round(main["hr"], 1) if main["hr"] is not None else None,
@@ -193,11 +200,12 @@ def build_peloton_sessions(rows: list[dict], strength_sessions: list[dict]) -> t
             "warmup_hr": warmup_hr,
             "cooldown_hr": cooldown_hr,
             "hr_recovery": round(main["hr"] - cooldown_hr, 1) if (main["hr"] is not None and cooldown_hr is not None) else None,
-            "pre_strength_for": pre_strength_dt.date().isoformat() if pre_strength_dt else None,
-        })
-        if pre_strength_dt:
-            mark_strength_warmup(pre_strength_dt, main["name"])
+            "pre_strength_for": None,
+        }
+        sessions.append(record)
+        peloton_entries.append({"end": bundle_end, "name": main["name"], "record": record})
 
+    match_rides_to_strength(peloton_entries, strength_sessions)
     return sessions, warmup_only
 
 

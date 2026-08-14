@@ -391,7 +391,7 @@
 
   <section id="strength-log">
     <h2>Strength: the first structured program in this dataset's history</h2>
-    <p class="lede">A self-directed "Week N Day N" program is the bulk of the sessions below. The "Trainer-led" entries are a different thing: live 1-hour appointments, logged into Hevy after the fact, so their raw duration is just how long the logging took, not the session — shown here as an estimated 60 min (50 min training + 2×5 min stretch) instead, marked with *. See <code>data/context/life_events.json</code> for the full note on this. Sessions marked <span class="s-note-inline">🚴</span> below were immediately preceded by a Peloton ride (ended within 20 min of the session start) that likely served as that day's warm-up — based on timing, this turns out to be a self-directed-program pattern, not a trainer-led one.</p>
+    <p class="lede">A self-directed "Week N Day N" program is the bulk of the sessions below. The "Trainer-led" entries are a different thing: live 1-hour appointments at the trainer's house, logged into Hevy after the fact, so their raw duration is just how long the logging took, not the session — shown here as an estimated 60 min (50 min training + 2×5 min stretch) instead, marked with *. See <code>data/context/life_events.json</code> for the full note on this. Sessions marked <span class="s-note-inline">🚴</span> below were warmed up for with a same-day Peloton ride beforehand — a short ride at home before walking over. For self-directed sessions that's identified by a tight end-to-start gap (logged live); trainer-led sessions are logged well after the fact (shower, eat, then log from a photo of the paper notes), so those are matched by same-day timing instead.</p>
     <div class="strength-log" id="strength-log"></div>
   </section>
 
@@ -778,7 +778,7 @@ async function main() {
         ? `<span class="s-est" title="Logged after the fact in Hevy — ${s.logged_minutes} min is how long it took to log, not the session length. Estimated at 50 min training + 2×5 min stretch.">${s.minutes} min*</span>`
         : `${s.minutes ?? '–'} min`;
       const warmupNote = s.warmup_ride
-        ? `<span class="s-note-inline" title="Preceded by ${s.warmup_ride}, ended within 20 min of this session's start">🚴</span>`
+        ? `<span class="s-note-inline" title="Warmed up with ${s.warmup_ride} earlier that day${s.trainer_led ? '' : ' (ended within 20 min of logging this session)'}">🚴</span>`
         : '';
       r.innerHTML = `<span class="s-date">${s.date}</span>` +
         `<span class="s-chip ${chip}">${chipLabel}</span>` +

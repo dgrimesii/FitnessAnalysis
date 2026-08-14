@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-12T17:29:51.431371+00:00",
+  "generated_at": "2026-08-14T13:15:58.562083+00:00",
   "window_start": "2026-06-01",
   "data_through": "2026-08-03",
   "week_keys": [
@@ -305,7 +305,7 @@
       "warmup_hr": null,
       "cooldown_hr": null,
       "hr_recovery": null,
-      "pre_strength_for": null
+      "pre_strength_for": "2026-07-19"
     },
     {
       "date": "2026-07-21",
@@ -385,7 +385,7 @@
       "warmup_hr": null,
       "cooldown_hr": null,
       "hr_recovery": null,
-      "pre_strength_for": null
+      "pre_strength_for": "2026-07-26"
     },
     {
       "date": "2026-07-28",
@@ -433,7 +433,7 @@
       "warmup_hr": null,
       "cooldown_hr": null,
       "hr_recovery": null,
-      "pre_strength_for": null
+      "pre_strength_for": "2026-08-02"
     }
   ],
   "peloton_warmup_only": [
@@ -481,7 +481,8 @@
       "name": "Training Session 3",
       "minutes": 60,
       "logged_minutes": 9.5,
-      "trainer_led": true
+      "trainer_led": true,
+      "warmup_ride": "20 min Low Impact Ride with Jenn Sherman"
     },
     {
       "date": "2026-07-21",
@@ -500,7 +501,8 @@
       "name": "Trainer Session 4",
       "minutes": 60,
       "logged_minutes": 7.5,
-      "trainer_led": true
+      "trainer_led": true,
+      "warmup_ride": "20 min Low Impact Ride with Emma Lovewell"
     },
     {
       "date": "2026-07-29",
@@ -518,7 +520,8 @@
       "name": "Trainer Session 5",
       "minutes": 60,
       "logged_minutes": 10.7,
-      "trainer_led": true
+      "trainer_led": true,
+      "warmup_ride": "20 min Low Impact Ride with Sam Yo"
     }
   ],
   "monthly_2026": [
