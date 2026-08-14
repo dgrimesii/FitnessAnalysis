@@ -98,6 +98,25 @@ should remain — in practice there usually won't be anything else, since
 - **Owner reviews and closes**: check the corresponding box on #27. Closing the
   issue itself is the owner's call, per "Before starting an issue" above.
 
+### Commit messages
+
+Every commit tied to issue work references the issue and explains why, not
+just what:
+
+- Subject line: `#<N>: <short description>` — e.g. `#16: build unattended
+  Strava API id-verification check`.
+- Body: the reasoning behind the change — what problem it solves, what it
+  unblocks, any tradeoff made — not a restatement of the diff. If the commit
+  represents partial progress (work stopped at a `(requires you)` blocker,
+  say), state that explicitly and point to the issue, rather than leaving it
+  to be inferred later from the diff alone.
+- Keep the `Co-Authored-By: Claude <noreply@anthropic.com>` trailer on commits
+  Claude Code makes.
+
+This is what makes `git log` a second, independent trail of a change alongside
+the issue's own comments — useful on its own, and essential if the two ever
+need to be cross-checked against each other.
+
 ## Non-negotiable invariants
 
 These recur across many issues. They were chosen deliberately — if one seems to
